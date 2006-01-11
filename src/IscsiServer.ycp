@@ -83,6 +83,12 @@ global boolean Modified() {
 //    */
 //   boolean additional_parameter = true;
 
+boolean readConfig(){
+ y2internal("config %1", SCR::Read(.etc.ietd.all));
+ return true;
+}
+
+
 /**
  * Read all iscsi-server settings
  * @return true on success
@@ -124,7 +130,7 @@ global boolean Read() {
     if(Abort()) return false;
     Progress::NextStage();
     /* Error message */
-    if(false) Report::Error(_("Cannot read database1."));
+    if(readConfig()==false) Report::Error(_("Cannot read database1."));
     sleep(sl);
 
     // read another database
