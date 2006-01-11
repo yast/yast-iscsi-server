@@ -19,6 +19,7 @@ import "Progress";
 import "Report";
 import "Summary";
 import "Message";
+import "Service";
 
 /**
  * Prototypes
@@ -263,6 +264,18 @@ global map AutoPackages() {
     // TODO FIXME: your code here...
     return $[ "install":[], "remove":[] ];
 }
+
+global boolean GetStartService() {
+
+ return Service::Enabled("iscsitarget");
+}
+
+global void SetStartService(boolean status) {
+ y2milestone("Set service status %1", status);
+ if (status == true) Service::Enable("iscsitarget");
+        else Service::Disable("iscsitarget");
+}
+
 
 /* EOF */
 }

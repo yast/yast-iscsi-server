@@ -14,82 +14,136 @@ textdomain "iscsi-server";
 import "Label";
 import "Wizard";
 import "IscsiServer";
-
+import "CWMTab";
+import "CWM";
+import "CWMServiceStart";
+import "CWMFirewallInterfaces";
+import "TablePopup";
 include "iscsi-server/helps.ycp";
 
+
+
+string current_tab = "general";
+
+map tabs_descr = $[
+        "general":$[
+         "header"       : _("Global iSCSI Client Configuration"),
+         "contents"     :
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                "auto_start_up",
+                                `VSpacing (2),
+                                "firewall",
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                              ),
+                          `VStretch()
+                        ),
+         "widget_names" : [ "auto_start_up", "firewall" ]
+         ],
+        "server":$[
+         "header"       : _("iSCSI Client"),
+         "contents"     :
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                "server_table",
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                               ),
+                          `VStretch()
+                        ),
+         "widget_names" : [ "server_table" ]
+        ]
+
+	];
+
+map<string, map <string, any> > widgets = $[
+            "auto_start_up" : CWMServiceStart::CreateAutoStartWidget ($[
+                "get_service_auto_start" : IscsiServer::GetStartService,
+                "set_service_auto_start" : IscsiServer::SetStartService,
+                // radio button (starting SLP service - option 1)
+                "start_auto_button" : _("When &Booting"),
+                // radio button (starting SLP service - option 2)
+                "start_manual_button" : _("&Manually"),
+                "help" : sformat (CWMServiceStart::AutoStartHelpTemplate (),
+                    // part of help text, used to describe radiobuttons (matching starting SLP service but without "&")
+                    _("When Booting"),
+                    // part of help text, used to describe radiobuttons (matching starting SLP service but without "&")
+                    _("Manually")
+                ),
+            ]),
+
+	"firewall" : CWMFirewallInterfaces::CreateOpenFirewallWidget ($[
+	        "services" : [ "slp-daemon" ],
+	        "display_details" : true,
+	      ]),
+       "server_table" :
+           TablePopup::CreateTableDescr (
+            $["add_delete_buttons" : true, "up_down_buttons" : false, "unique_keys" : true ],
+             $[
+//              "init" : initTable,
+//              "store" : storeExpert,
+//              "options" : getServerOptions(),
+//              "ids" : valuesTable,
+//              "id2key" : Id2Key,
+//              "fallback" : $[
+//                "init" : rowInit,
+//                "store" : rowStore,
+//                "summary" : rowSummary,
+//                        ],
+//              "option_delete" : rowDelete,
+//              "handle" : handleTable,
+//              "add_items" : maplist(string k1, any v1, (map<string,any>) getServerOptions(), ``(k1)),
+              "help" : HELPS["server_table"]:""
+             ]
+            )
+
+	];
+
+
+
 /**
- * Configure1 dialog
+ * Summary dialog
  * @return dialog result
  */
-any Configure1Dialog () {
+any SummaryDialog() {
+    string caption = _("iSCSI Client Overview");
 
-    /* IscsiServer configure1 dialog caption */
-    string caption = _("IscsiServer Configuration");
+    map widget_descr = $[
+        "tab": CWMTab::CreateWidget($[
+            "tab_order": [ "general", "server" ],
+            "tabs": tabs_descr,
+            "widget_descr": widgets,
+            "initial_tab" : current_tab,
+            "tab_help" : _("<h1>open iSCSI </h1>"),
+        ]),
+    ];
+    term contents = `VBox( "tab"/*, `VStretch ()*/);
 
-    /* IscsiServer configure1 dialog contents */
-    term contents = `Label (_("First part of configuration of iscsi-server"));
+    list<map <string, any> > w = CWM::CreateWidgets (["tab"], (map <string, map <string, any> >)widget_descr);
+    string help = CWM::MergeHelps(w);
+    contents = CWM::PrepareDialog(contents, w);
 
-    Wizard::SetContentsButtons(caption, contents, HELPS["c1"]:"",
-	    Label::BackButton(), Label::NextButton());
+    Wizard::SetContentsButtons(caption, contents, help, Label::NextButton (), Label::FinishButton ());
+    Wizard::HideBackButton();
 
-    any ret = nil;
-    while(true) {
-
-	ret = UI::UserInput();
-
-	/* abort? */
-	if(ret == `abort || ret == `cancel) {
-	    if(ReallyAbort()) break;
-	    else continue;
-	}
-        else if(ret == `next || ret == `back) {
-            break;
-        }
-        else {
-            y2error("unexpected retcode: %1", ret);
-            continue;
-        }
-    }
+    symbol ret = CWM::Run(w, $[`abort:ReallyAbort ]);
 
     return ret;
 }
 
-/**
- * Configure2 dialog
- * @return dialog result
- */
-any Configure2Dialog () {
-
-    /* IscsiServer configure2 dialog caption */
-    string caption = _("IscsiServer Configuration");
-
-    /* IscsiServer configure2 dialog contents */
-    term contents = `Label (_("Second part of configuration of iscsi-server"));
-
-    Wizard::SetContentsButtons(caption, contents, HELPS["c2"]:"",
-	    Label::BackButton(), Label::NextButton());
-
-    any ret = nil;
-    while(true) {
-
-	ret = UI::UserInput();
-
-	/* abort? */
-	if(ret == `abort || ret == `cancel) {
-	    if(ReallyAbort()) break;
-	    else continue;
-	}
-        else if(ret == `next || ret == `back) {
-            break;
-        }
-        else {
-            y2error("unexpected retcode: %1", ret);
-            continue;
-        }
-    }
-
-    return ret;
-}
 
 /* EOF */
 }
