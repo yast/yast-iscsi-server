@@ -17,8 +17,7 @@ desktop_DATA =			\
 	iscsi-server.desktop
 
 module_DATA =			\
-	IscsiServer.ycp		\
-	IscsiServer2.pm
+	IscsiServer.ycp		
 
 EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(desktop_DATA)
 
