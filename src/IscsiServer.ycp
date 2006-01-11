@@ -21,6 +21,9 @@ import "Summary";
 import "Message";
 import "Service";
 
+map <string, any> config_file = $[];
+
+
 /**
  * Prototypes
  */
@@ -84,7 +87,8 @@ global boolean Modified() {
 //   boolean additional_parameter = true;
 
 boolean readConfig(){
- y2internal("config %1", SCR::Read(.etc.ietd.all));
+ config_file = (map<string, any>)SCR::Read(.etc.ietd.all);
+ y2internal("config %1", config_file);
  return true;
 }
 
