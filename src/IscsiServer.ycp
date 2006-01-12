@@ -22,7 +22,7 @@ import "Message";
 import "Service";
 
 map <string, any> config_file = $[];
-
+global list<map<string, any> > config = [];
 
 /**
  * Prototypes
@@ -78,17 +78,17 @@ global boolean Modified() {
 // TODO FIXME: For example:
 //   /**
 //    * List of the configured cards.
-//    */
 //   list cards = [];
 //
 //   /**
 //    * Some additional parameter needed for the configuration.
-//    */
 //   boolean additional_parameter = true;
 
 boolean readConfig(){
  config_file = (map<string, any>)SCR::Read(.etc.ietd.all);
- y2internal("config %1", config_file);
+ foreach(map<string, any> row, config_file["value"]:[], {
+  config = add(config, $["KEY":row["name"]:"", "VALUE":row["value"]:""] );
+ });
  return true;
 }
 

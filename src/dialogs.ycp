@@ -22,12 +22,20 @@ import "TablePopup";
 include "iscsi-server/helps.ycp";
 
 
-
+void initTable (string key);
+list<string> keys = [];
+map <string, any> table_rows = $[];
+list valuesTable (map descr);
+string Id2Key( map desc, any option_id );
+string rowSummary(any option_id, string option_type);
+void rowInit (any option_id, string option_type);
+void rowStore (any option_id, string option_type);
+void storeTable (string key, map event);
 string current_tab = "general";
 
 map tabs_descr = $[
         "general":$[
-         "header"       : _("Global iSCSI Client Configuration"),
+         "header"       : _("Global iSCSI Server Configuration"),
          "contents"     :
                           `VBox(
                           `VStretch(),
@@ -48,7 +56,7 @@ map tabs_descr = $[
          "widget_names" : [ "auto_start_up", "firewall" ]
          ],
         "server":$[
-         "header"       : _("iSCSI Client"),
+         "header"       : _("iSCSI Server"),
          "contents"     :
                           `VBox(
                           `VStretch(),
@@ -93,16 +101,16 @@ map<string, map <string, any> > widgets = $[
            TablePopup::CreateTableDescr (
             $["add_delete_buttons" : true, "up_down_buttons" : false, "unique_keys" : true ],
              $[
-//              "init" : initTable,
-//              "store" : storeExpert,
+              "init" : initTable,
+              "store" : storeTable,
 //              "options" : getServerOptions(),
-//              "ids" : valuesTable,
-//              "id2key" : Id2Key,
-//              "fallback" : $[
-//                "init" : rowInit,
-//                "store" : rowStore,
-//                "summary" : rowSummary,
-//                        ],
+              "ids" : valuesTable,
+              "id2key" : Id2Key,
+              "fallback" : $[
+                "init" : rowInit,
+                "store" : rowStore,
+                "summary" : rowSummary,
+                        ],
 //              "option_delete" : rowDelete,
 //              "handle" : handleTable,
 //              "add_items" : maplist(string k1, any v1, (map<string,any>) getServerOptions(), ``(k1)),
@@ -112,6 +120,43 @@ map<string, map <string, any> > widgets = $[
 
 	];
 
+define void initTable (string key) ``{
+    keys = [];
+     table_rows=$[];
+     integer row = 0;
+     foreach(map<string, any> s, IscsiServer::config, {
+      table_rows[tostring(row)] = s ;
+      keys = add(keys, tostring(row));
+      row = row + 1;
+     });
+      y2milestone ("Table_rows : %1", table_rows );
+
+    TablePopup::TableInit (CWM::GetProcessedWidget (), key);
+}
+
+define list valuesTable (map descr) {
+  return keys;
+}
+
+define string Id2Key( map desc, any option_id ) ``{
+ return table_rows[tostring(option_id), "KEY"]:"";
+}
+
+define string rowSummary(any option_id, string option_type)``{
+ return table_rows[tostring(option_id), "VALUE"]:"";
+}
+
+define void rowInit (any option_id, string option_type) ``{
+ UI::ChangeWidget (`id (option_type), `Value, table_rows[tostring(option_id), "VALUE"]:"");
+}
+
+void rowStore (any option_id, string option_type) ``{
+ table_rows[tostring(option_id), "VALUE"]=(string)UI::QueryWidget (`id (option_type), `Value);
+}
+
+define void storeTable (string key, map event) ``{
+y2internal("storing ...%1 \n%2", key, event);
+}
 
 
 /**
@@ -119,7 +164,7 @@ map<string, map <string, any> > widgets = $[
  * @return dialog result
  */
 any SummaryDialog() {
-    string caption = _("iSCSI Client Overview");
+    string caption = _("iSCSI Server Overview");
 
     map widget_descr = $[
         "tab": CWMTab::CreateWidget($[
