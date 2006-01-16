@@ -1,0 +1,99 @@
+/**
+ * File:	include/iscsi-server/helps.ycp
+ * Package:	Configuration of iscsi-server
+ * Summary:	Help texts of all the dialogs
+ * Authors:	Michal Zugec <mzugec@suse.cz>
+ *
+ * $Id: helps.ycp 23442 2005-05-18 07:46:28Z visnov $
+ */
+
+{
+
+textdomain "iscsi-server";
+
+/**
+ * All helps are here
+ */
+map HELPS = $[
+
+    /* Read dialog help 1/2 */
+    "read" : _("<p><b><big>Initializing iscsi-server Configuration</big></b><br>
+Please wait...<br></p>
+") +
+
+    /* Read dialog help 2/2 */
+    _("<p><b><big>Aborting Initialization:</big></b><br>
+Safely abort the configuration utility by pressing <b>Abort</b> now.</p>
+"),
+
+    /* Write dialog help 1/2 */
+    "write" : _("<p><b><big>Saving iscsi-server Configuration</big></b><br>
+Please wait...<br></p>
+") +
+
+    /* Write dialog help 2/2 */
+_("<p><b><big>Aborting Saving:</big></b><br>
+Abort the save procedure by pressing <b>Abort</b>.
+An additional dialog informs whether it is safe to do so.
+</p>
+"),
+
+    /* Summary dialog help 1/3 */
+    "summary" : _("<p><b><big>IscsiServer Configuration</big></b><br>
+Configure iscsi-server here.<br></p>
+") +
+
+    /* Summary dialog help 2/3 */
+    _("<p><b><big>Adding a iscsi-server:</big></b><br>
+Choose an iscsi-server from the list of detected iscsi-servers.
+If your iscsi-server was not detected, use <b>Other (not detected)</b>.
+Then press <b>Configure</b>.</p>
+") +
+
+    /* Summary dialog help 3/3 */
+    _("<p><b><big>Editing or Deleting:</big></b><br>
+If you press <b>Edit</b>, an additional dialog in which to change
+the configuration opens.</p>
+"),
+
+    /* Ovreview dialog help 1/3 */
+    "overview" : _("<p><b><big>IscsiServer Configuration Overview</big></b><br>
+Obtain an overview of installed iscsi-servers. Additionally
+edit their configurations.<br></p>
+") +
+
+    /* Ovreview dialog help 2/3 */
+_("<p><b><big>Adding a iscsi-server:</big></b><br>
+Press <b>Add</b> to configure a iscsi-server.</p>") +
+
+    /* Ovreview dialog help 3/3 */
+_("<p><b><big>Editing or Deleting:</big></b><br>
+Choose a iscsi-server to change or remove.
+Then press <b>Edit</b> or <b>Delete</b> as desired.</p>
+"),
+
+    /* Configure1 dialog help 1/2 */
+    "c1" : _("<p><b><big>Configuration Part One</big></b><br>
+Press <b>Next</b> to continue.
+<br></p>") +
+
+    /* Configure1 dialog help 2/2 */
+_("<p><b><big>Selecting Something</big></b><br>
+It is not possible. You must code it first. :-)
+</p>"),
+
+    /* Configure2 dialog help 1/2 */
+    "c2" : _("<p><b><big>Configuration Part Two</big></b><br>
+Press <b>Next</b> to continue.
+<br></p>
+") +
+
+    /* Configure2 dialog help 2/2 */
+_("<p><b><big>Selecting Something</big></b><br>
+It is not possible. You must code it first. :-)
+</p>"),
+
+];
+
+/* EOF */
+}
