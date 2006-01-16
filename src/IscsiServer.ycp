@@ -22,7 +22,8 @@ import "Message";
 import "Service";
 
 map <string, any> config_file = $[];
-global list<map<string, any> > config = [];
+global map<string, any> config = $[];
+global map<string, any> auth = $[];
 
 /**
  * Prototypes
@@ -86,12 +87,52 @@ global boolean Modified() {
 
 boolean readConfig(){
  config_file = (map<string, any>)SCR::Read(.etc.ietd.all);
+ string c_scope="";
  foreach(map<string, any> row, config_file["value"]:[], {
-  config = add(config, $["KEY":row["name"]:"", "VALUE":row["value"]:""] );
+  if (size(c_scope)==0 && ( row["name"]:"" == "IncomingUser" || row["name"]:"" == "OutgoingUser" ))
+				auth = $["KEY":row["name"]:"", "VALUE":row["value"]:""];
+   else if (row["name"]:"" == "Target") {
+			c_scope = row["value"]:"";
+			config[c_scope] = [ $[ "KEY":"Target", "VALUE":row["value"]:"" ] ];
+			}
+	else config[c_scope] = add(config[c_scope]:[], $[ "KEY":row["name"]:"", "VALUE":row["value"]:"" ]);
  });
  return true;
 }
 
+boolean writeConfig(){
+// y2internal("config %1", config);
+// y2internal("auth %1", auth);
+// y2internal("c.f. %1", config_file);
+ string c_scope = "";
+ list <map<string, any> > tmp1_config = [];
+ foreach(map<string, any> row, config_file["value"]:[], {
+//  y2internal("%1", row);
+
+  if ( c_scope=="" && row["name"]:"" != "Target" ) {
+   if (size(auth)>0){
+    row["name"] = auth["KEY"]:"";
+    row["value"] = auth["VALUE"]:"";
+//    y2internal("auth ... %1", row);
+    tmp1_config = add(tmp1_config, row);
+   }
+  }
+     if (row["name"]:"" == "Target"){
+      c_scope  = row["value"]:"";
+      tmp1_config = add(tmp1_config, row);
+//      y2internal("%1", row);
+     } else
+	{
+	 //if ()
+//	 y2internal("1-%1\n2-%2", row, config[c_scope]:"");
+	 tmp1_config = add(tmp1_config, row);
+	}
+
+ });
+y2internal("fake write %1", tmp1_config);
+ SCR::Write(.etc.ietd.all, config_file);
+ return true;
+}
 
 /**
  * Read all iscsi-server settings
@@ -205,7 +246,7 @@ global boolean Write() {
     if(Abort()) return false;
     Progress::NextStage();
     /* Error message */
-    if(false) Report::Error (_("Cannot write settings."));
+    if(writeConfig()==false) Report::Error (_("Cannot write settings."));
     sleep(sl);
 
     // run SuSEconfig

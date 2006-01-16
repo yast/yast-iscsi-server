@@ -14,7 +14,7 @@
 `ag_ini(
     `IniAgent( "/etc/ietd.conf",
         $[
-        "options" : [ "global_values", "comments_last", "ignore_case", "line_can_continue", "join_multiline", "repeat_names" ],
+        "options" : [ "global_values", "comments_last", "line_can_continue", "join_multiline", "repeat_names" ],
         "comments": [
             "^[ \t]*$", // empty line
             "^[ \t]+[;#].*$", // comment char is not first char
