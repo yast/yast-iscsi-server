@@ -30,7 +30,7 @@ string Id2Key( map desc, any option_id );
 string rowSummary(any option_id, string option_type);
 void rowInit (any option_id, string option_type);
 void rowStore (any option_id, string option_type);
-void storeTable (string key, map event);
+//void storeTable (string key, map event);
 void initGlobal (string key);
 void storeGlobal(string option_id, map option_map);
 symbol handleTable (string table, map event);
@@ -149,7 +149,7 @@ map<string, map <string, any> > widgets = $[
             $["add_delete_buttons" : true, "up_down_buttons" : false, "unique_keys" : true ],
              $[
               "init" : initTable,
-              "store" : storeTable,
+//              "store" : storeTable,
 //              "options" : getServerOptions(),
               "ids" : valuesTable,
 //              "id2key" : Id2Key,
@@ -204,12 +204,12 @@ define list valuesTable (map descr) {
   return keys;
 }
 
+/*
 define void storeTable (string key, map event) ``{
-y2internal("storing ...%1 \n%2", key, event);
 }
+*/
 
 void initGlobal (string key){
-y2internal("auth - %1", IscsiServer::auth);
  if (size(IscsiServer::auth)>0)
   {
    if (IscsiServer::auth["KEY"]:""=="IncomingUser") UI::ChangeWidget(`id(`auth), `CurrentButton, `in);
@@ -252,7 +252,7 @@ symbol handleTable (string table, map event){
 		    foreach(string key, any value, IscsiServer::config, {
 		     keys = add(keys, key);
 		    });
-
+//y2internal("delete : \n%1", IscsiServer::config);
 		 TablePopup::TableInit (CWM::GetProcessedWidget (), table);
 		}
 		break;
@@ -322,7 +322,7 @@ define void storeAddTarget(string option_id, map option_map){
   case(`out) : IscsiServer::config[target] = add(IscsiServer::config[target]:[], $[ "KEY":"OutgoingUser", "VALUE":pass ]);
                 break;
  }
- y2internal("%1", IscsiServer::config);
+y2internal("store %1", IscsiServer::config);
 }
 
 

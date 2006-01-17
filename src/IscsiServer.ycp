@@ -100,36 +100,89 @@ boolean readConfig(){
  return true;
 }
 
+boolean find_in(map<string, any> my_conf, string to_find){
+ boolean ret = false;
+ foreach(string key, any value, my_conf, {
+  if ( key == to_find ) ret = true;
+ });
+ return ret;
+}
+
+map<string, any> create_map(map<string, any> old_map)
+{
+ y2internal("old map %1", old_map);
+ return $[ "name":old_map["KEY"]:"",
+           "value":old_map["VALUE"]:"",
+           "kind":"value",
+           "type":1,
+           "comment":""
+         ];
+}
+
+
 boolean writeConfig(){
-// y2internal("config %1", config);
-// y2internal("auth %1", auth);
-// y2internal("c.f. %1", config_file);
  string c_scope = "";
- list <map<string, any> > tmp1_config = [];
+ list <map<string, any> > tmp2_config = [];
+ list <string> used_scopes = [];
+ list <map<string, any> > need_keys = [];
+
  foreach(map<string, any> row, config_file["value"]:[], {
-//  y2internal("%1", row);
 
   if ( c_scope=="" && row["name"]:"" != "Target" ) {
    if (size(auth)>0){
     row["name"] = auth["KEY"]:"";
     row["value"] = auth["VALUE"]:"";
-//    y2internal("auth ... %1", row);
-    tmp1_config = add(tmp1_config, row);
+    tmp2_config = add(tmp2_config, row);
    }
-  }
+  } else
      if (row["name"]:"" == "Target"){
+y2internal("in target %1", row);
+      need_keys = maplist(map<string, any> my_map, need_keys, { return create_map(my_map);});
+      tmp2_config = (list<map<string, any> >)flatten([ tmp2_config, need_keys ]);
       c_scope  = row["value"]:"";
-      tmp1_config = add(tmp1_config, row);
-//      y2internal("%1", row);
+      used_scopes = add( used_scopes, c_scope );
+    need_keys = config[c_scope]:[];
      } else
 	{
-	 //if ()
-//	 y2internal("1-%1\n2-%2", row, config[c_scope]:"");
-	 tmp1_config = add(tmp1_config, row);
+	 list <string> used_keys = [];
+	 foreach(map<string, any> m, config[c_scope]:[], {
+	 if (m["KEY"]:"" == row["name"]:"") {
+	   row["value"] = m["VALUE"]:"";
+	  }
+	   used_keys = add(used_keys, m["KEY"]:"");
+	 });
+y2internal("before test");
+	 if ((find_in(config, c_scope)) && (contains(used_keys, row["name"]:""))) {
+y2internal("in body %1", row);
+y2internal("need_keys before %1", need_keys);
+/*
+							need_keys = filter(map<string, any> k, need_keys, {
+								if (k["KEY"]:"" == row["name"]:"") return false;
+									else return true;
+							 });
+*/
+y2internal("need_keys after %1", need_keys);
+							}
 	}
-
  });
-y2internal("fake write %1", tmp1_config);
+
+ need_keys = maplist(map<string, any> my_map, need_keys, { return create_map(my_map);});
+// tmp1_config = (list<map<string, any> >)flatten([ tmp1_config, need_keys ]);
+ tmp2_config = (list<map<string, any> >)flatten([ tmp2_config, need_keys ]);
+y2internal("tmp2_config %1", tmp2_config);
+
+ foreach(string key, any value, config, {
+  if (!contains(used_scopes, key)){
+	list <map<string, any> > tmp1_config = [];
+	foreach(map<string, any>  row, config[key]:[], {
+	 tmp1_config = add( tmp1_config, create_map(row) );
+	});
+	tmp2_config = (list<map<string, any> >)flatten([ tmp2_config, tmp1_config ]);
+       }
+ });
+ config_file["value"] = tmp2_config;
+ y2internal("final write %1", tmp2_config);
+
  SCR::Write(.etc.ietd.all, config_file);
  return true;
 }
