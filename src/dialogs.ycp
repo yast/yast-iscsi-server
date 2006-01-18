@@ -36,7 +36,9 @@ void storeGlobal(string option_id, map option_map);
 symbol handleTable (string table, map event);
 boolean validateAddTarget(string key, map event);
 void storeAddTarget(string option_id, map option_map);
+void initModify(string key);
 string current_tab = "service";
+string modify_record = "";
 
 map tabs_descr = $[
         "service":$[
@@ -190,6 +192,31 @@ map<string, map <string, any> > widgets = $[
 //        "label"  : _("Settings of SLP server"),
 //        "help" : HELPS["global_config"]:""
         ],
+     "target-modify" : $[
+        "widget" : `custom,
+        "custom_widget" :
+                 `VBox(
+		  `ReplacePoint(`id(`r_target), `TextEntry(`id(`target), _("Target")) ),
+                  `RadioButtonGroup
+                    (
+                     `id(`auth),
+                     `VBox(
+		     `Left(`RadioButton(`id(`no), _("No Auth"), true)),
+                     `Left(`RadioButton(`id(`in), _("Incoming"))),
+                     `Left(`RadioButton(`id(`out), _("Outgoing")))
+                     )
+                    ),
+                  `ReplacePoint(`id(`r_pass), `TextEntry(`id(`pass), _("User Password")) ),
+		  `ReplacePoint(`id(`r_lun), `TextEntry(`id(`lun), _("Logical Unit Definition")) )
+                 ),
+        "init"   : initModify,
+//        "handle" : handleAddTarget,
+        "store"  : storeAddTarget,
+//        "validate_type" : `function,
+//        "validate_function" : validateAddTarget,
+//        "label"  : _("Settings of SLP server"),
+//        "help" : HELPS["global_config"]:""
+        ],
 	];
 
 define void initTable (string key) ``{
@@ -242,7 +269,8 @@ symbol handleTable (string table, map event){
 		ret = `add;
 		break;
   case(`_tp_edit)        :
-		y2internal("edit");
+		modify_record = tostring( UI::QueryWidget(`id(`_tp_table), `CurrentItem) );
+		ret = `edit;
 		break;
   case(`_tp_delete)        :
 		if (Popup::ContinueCancel(_("Are You Sure To Delete This Item?"))){
@@ -252,7 +280,6 @@ symbol handleTable (string table, map event){
 		    foreach(string key, any value, IscsiServer::config, {
 		     keys = add(keys, key);
 		    });
-//y2internal("delete : \n%1", IscsiServer::config);
 		 TablePopup::TableInit (CWM::GetProcessedWidget (), table);
 		}
 		break;
@@ -307,7 +334,7 @@ boolean validateAddTarget(string key, map event){
 }
 
 define void storeAddTarget(string option_id, map option_map){
-  string target = tostring( UI::QueryWidget(`id(`target), `Value)    );
+ string target = tostring( UI::QueryWidget(`id(`target), `Value)    );
  string pass = tostring(   UI::QueryWidget(`id(`pass), `Value)      );
  string lun = tostring(    UI::QueryWidget(`id(`lun), `Value)       );
 
@@ -322,9 +349,30 @@ define void storeAddTarget(string option_id, map option_map){
   case(`out) : IscsiServer::config[target] = add(IscsiServer::config[target]:[], $[ "KEY":"OutgoingUser", "VALUE":pass ]);
                 break;
  }
-y2internal("store %1", IscsiServer::config);
 }
 
+define void initModify (string key) ``{
+ foreach( map<string, any> row, (list<map<string, any> >) IscsiServer::config[modify_record]:[], {
+  y2internal("%1", row);
+  switch(row["KEY"]:""){
+   case("Target")	:
+				UI::ReplaceWidget(`id(`r_target), `TextEntry(`id(`target), _("Target"), row["VALUE"]:"") );
+				UI::ChangeWidget( `id(`r_target), `Enabled, false);
+				break;
+   case("Lun")		:
+                                UI::ReplaceWidget(`id(`r_lun), `TextEntry(`id(`lun), _("Logical Unit Definition"), row["VALUE"]:"") );
+                                break;
+   case("IncomingUser")	:
+				UI::ChangeWidget( `id(`auth), `CurrentButton, `in);
+				UI::ReplaceWidget(`id(`r_pass), `TextEntry(`id(`pass), _("User Password"), row["VALUE"]:"") );
+                                break;
+   case("OutgoingUser")	:
+				UI::ChangeWidget( `id(`auth), `CurrentButton, `out);
+				UI::ReplaceWidget(`id(`r_pass), `TextEntry(`id(`pass), _("User Password"), row["VALUE"]:"") );
+                                break;
+  }
+ });
+}
 
 /**
  * Summary dialog
@@ -379,6 +427,35 @@ any AddDialog(){
     string help = CWM::MergeHelps(w);
     contents = CWM::PrepareDialog(contents, w);
     Wizard::SetContentsButtons(caption, contents, HELPS["target-add"]:"",
+            Label::BackButton(), Label::NextButton());
+
+    any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
+    return ret;
+}
+
+any EditDialog(){
+     current_tab = "targets";
+    string caption = _("iSCSI Modify Target");
+    list<map <string, any> > w = CWM::CreateWidgets (["target-modify"], (map <string, map <string, any> >)widgets);
+        term contents =
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                w[0, "widget"]:`VSpacing (1),
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                               ),
+                          `VStretch()
+                        );
+
+    string help = CWM::MergeHelps(w);
+    contents = CWM::PrepareDialog(contents, w);
+    Wizard::SetContentsButtons(caption, contents, HELPS["target-modify"]:"",
             Label::BackButton(), Label::NextButton());
 
     any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
