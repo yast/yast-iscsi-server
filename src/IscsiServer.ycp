@@ -20,6 +20,8 @@ import "Report";
 import "Summary";
 import "Message";
 import "Service";
+import "Package";
+import "Popup";
 
 map <string, any> config_file = $[];
 global map<string, any> config = $[];
@@ -187,6 +189,20 @@ y2internal("tmp2_config %1", tmp2_config);
  return true;
 }
 
+
+boolean installed_packages(){
+ boolean ret = false;
+  if( !Package::InstallMsg( "iscsitarget",
+            _("<p>To configure the SLP server, the <b>%1</b> packages must be installed.</p>") +
+            _("<p>Do you want to install it now?</p>")) )
+        {
+        Popup::Error( Message::CannotContinueWithoutPackagesInstalled() );
+    } else ret = true;
+
+ return ret;
+}
+
+
 /**
  * Read all iscsi-server settings
  * @return true on success
@@ -249,7 +265,7 @@ global boolean Read() {
     if(Abort()) return false;
     Progress::NextStage();
     /* Error message */
-    if(false) Report::Warning(_("Cannot detect devices."));
+    if(!installed_packages()) return false;
     sleep(sl);
 
     if(Abort()) return false;
