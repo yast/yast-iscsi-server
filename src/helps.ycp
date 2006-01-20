@@ -93,6 +93,19 @@ _("<p><b><big>Selecting Something</big></b><br>
 It is not possible. You must code it first. :-)
 </p>"),
 
+	"global_config"	: _("Select type of authentication. If any, fill <b>User</b> and <b>Password</b> delimited by space.  "),
+
+	"server_table" :_("List of offered targets. Create new target by click <b>Add</b>. 
+For delete and modify select an item and press <b>Modify</b> or <b>Delete</b>"),
+
+	"target-modify":	_("<h1>open iSCSI</h1>") + _("Possible to change autentification type, 
+Username and Password, delimited by space. Also change Logical Unit Definition is possible."),
+
+	"target-add":	_("<h1>open iSCSI</h1>") + _("Create new target. Replace template values with real.
+Possible to change autentification type,
+Username and Password, delimited by space. Also change Logical Unit Definition is possible.
+"),
+
 ];
 
 /* EOF */

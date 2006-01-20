@@ -144,7 +144,7 @@ map<string, map <string, any> > widgets = $[
 //        "validate_type" : `function,
 //        "validate_function" : validateGlobal,
 //        "label"  : _("Settings of SLP server"),
-//        "help" : HELPS["global_config"]:""
+        "help" : HELPS["global_config"]:""
         ],
        "server_table" :
            TablePopup::CreateTableDescr (
@@ -190,7 +190,7 @@ map<string, map <string, any> > widgets = $[
         "validate_type" : `function,
         "validate_function" : validateAddTarget,
 //        "label"  : _("Settings of SLP server"),
-//        "help" : HELPS["global_config"]:""
+        "help" : HELPS["target-add"]:""
         ],
      "target-modify" : $[
         "widget" : `custom,
@@ -215,7 +215,7 @@ map<string, map <string, any> > widgets = $[
 //        "validate_type" : `function,
 //        "validate_function" : validateAddTarget,
 //        "label"  : _("Settings of SLP server"),
-//        "help" : HELPS["global_config"]:""
+        "help" : HELPS["target-modify"]:""
         ],
 	];
 
