@@ -250,9 +250,11 @@ void storeGlobal(string option_id, map option_map){
   switch((symbol)UI::QueryWidget(`id(`auth), `CurrentButton)){
    case(`in)	:
 		IscsiServer::auth["KEY"] = "IncomingUser";
+		IscsiServer::auth["VALUE"] = tostring(UI::QueryWidget(`id(`pass), `Value));
 		break;
    case(`out)	:
 		IscsiServer::auth["KEY"] = "OutgoingUser";
+		IscsiServer::auth["VALUE"] = tostring(UI::QueryWidget(`id(`pass), `Value));
 		break;
    case(`no)	:
 		IscsiServer::auth = $[];

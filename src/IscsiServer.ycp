@@ -128,6 +128,10 @@ boolean writeConfig(){
  list <string> used_scopes = [];
  list <map<string, any> > need_keys = [];
 
+y2internal("auth %1", auth);
+
+
+
  foreach(map<string, any> row, config_file["value"]:[], {
 
   if ( c_scope=="" && row["name"]:"" != "Target" ) {
@@ -138,7 +142,11 @@ boolean writeConfig(){
    }
   } else
      if (row["name"]:"" == "Target"){
-y2internal("in target %1", row);
+	if (size(auth)>0 && size(tmp2_config)==0){
+	 row["name"] = auth["KEY"]:"";
+	 row["value"] = auth["VALUE"]:"";
+	 tmp2_config = add(tmp2_config, row);
+	}
       need_keys = maplist(map<string, any> my_map, need_keys, { return create_map(my_map);});
       tmp2_config = (list<map<string, any> >)flatten([ tmp2_config, need_keys ]);
       c_scope  = row["value"]:"";
@@ -153,17 +161,7 @@ y2internal("in target %1", row);
 	  }
 	   used_keys = add(used_keys, m["KEY"]:"");
 	 });
-y2internal("before test");
 	 if ((find_in(config, c_scope)) && (contains(used_keys, row["name"]:""))) {
-y2internal("in body %1", row);
-y2internal("need_keys before %1", need_keys);
-/*
-							need_keys = filter(map<string, any> k, need_keys, {
-								if (k["KEY"]:"" == row["name"]:"") return false;
-									else return true;
-							 });
-*/
-y2internal("need_keys after %1", need_keys);
 							}
 	}
  });
