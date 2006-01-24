@@ -208,7 +208,7 @@ boolean installed_packages(){
 global boolean Read() {
 
     /* IscsiServer read dialog caption */
-    string caption = _("Initializing iscsi-server Configuration");
+    string caption = _("Initializing iSCSI Server Configuration");
 
     // TODO FIXME Set the right number of stages
     integer steps = 4;
@@ -283,7 +283,7 @@ global boolean Read() {
 global boolean Write() {
 
     /* IscsiServer read dialog caption */
-    string caption = _("Saving iscsi-server Configuration");
+    string caption = _("Saving iSCSI Server Configuration");
 
     // TODO FIXME And set the right number of stages
     integer steps = 2;

@@ -101,7 +101,7 @@ any IscsiServerSequence() {
 any IscsiServerAutoSequence() {
 
     /* Initialization dialog caption */
-    string caption = _("IscsiServer Configuration");
+    string caption = _("iSCSI Server Configuration");
     /* Initialization dialog contents */
     term contents = `Label(_("Initializing..."));
 

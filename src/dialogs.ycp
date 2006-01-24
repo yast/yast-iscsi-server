@@ -275,7 +275,7 @@ symbol handleTable (string table, map event){
 		ret = `edit;
 		break;
   case(`_tp_delete)        :
-		if (Popup::ContinueCancel(_("Are You Sure To Delete This Item?"))){
+		if (Popup::ContinueCancel(_("Really delete this item?"))){
 		 string del=tostring(UI::QueryWidget(`id(`_tp_table), `CurrentItem));
 		 IscsiServer::config = filter(string key, any value, IscsiServer::config, {return (key != del);});
 		    keys = [];
@@ -315,20 +315,20 @@ boolean validateAddTarget(string key, map event){
 		break;
  }
 
- if (( size(target)==0 && (Popup::Error(_("Target Can't Be Empty"))==nil) ) ||
-	( if_exists("Target", target) && (Popup::Error(_("Target Already Exists"))==nil) )){
+ if (( size(target)==0 && (Popup::Error(_("Target cannot be Empty"))==nil) ) ||
+	( if_exists("Target", target) && (Popup::Error(_("Target already exists"))==nil) )){
   UI::SetFocus(`id(`target));
   return false;
  }
 
  if (type != "no" && size(pass)==0){
-  Popup::Error(_("Username/Password Can't Be Empty"));
+  Popup::Error(_("Username and password cannot be empty."));
   UI::SetFocus(`id(`pass));
   return false;
  }
 
- if ((size(lun)==0 && (Popup::Error(_("Logical Unit Definition Can't Be Empty"))==nil))||
-	( if_exists("Lun", lun) && (Popup::Error(_("Lun Already Exists"))==nil))){
+ if ((size(lun)==0 && (Popup::Error(_("Logical unit definition cannot be empty."))==nil))||
+	( if_exists("Lun", lun) && (Popup::Error(_("Logical unit already exists."))==nil))){
   UI::SetFocus(`id(`lun));
   return false;
  }
@@ -389,7 +389,7 @@ any SummaryDialog() {
             "tabs": tabs_descr,
             "widget_descr": widgets,
             "initial_tab" : current_tab,
-            "tab_help" : _("<h1>open iSCSI </h1>"),
+            "tab_help" : _("<h1>iSCSI Server</h1>"),
         ]),
     ];
     term contents = `VBox( "tab"/*, `VStretch ()*/);
@@ -408,7 +408,7 @@ any SummaryDialog() {
 
 any AddDialog(){
      current_tab = "targets";
-    string caption = _("iSCSI Add Target");
+    string caption = _("Add iSCSI Target");
     list<map <string, any> > w = CWM::CreateWidgets (["target-add"], (map <string, map <string, any> >)widgets);
         term contents =
                           `VBox(
@@ -437,7 +437,7 @@ any AddDialog(){
 
 any EditDialog(){
      current_tab = "targets";
-    string caption = _("iSCSI Modify Target");
+    string caption = _("Modify iSCSI Target");
     list<map <string, any> > w = CWM::CreateWidgets (["target-modify"], (map <string, map <string, any> >)widgets);
         term contents =
                           `VBox(
