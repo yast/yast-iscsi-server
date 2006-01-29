@@ -127,17 +127,18 @@ map<string, map <string, any> > widgets = $[
         "widget" : `custom,
         "custom_widget" :
                  `VBox(
-                  `RadioButtonGroup
-                    (
-                     `id(`auth),
-                     `VBox(
-		     `Left(`RadioButton(`id(`no), _("No Auth"), true)),
-                     `Left(`RadioButton(`id(`in), _("Incoming"))),
-                     `Left(`RadioButton(`id(`out), _("Outgoing")))
-                     )
-                    ),
-                  `TextEntry(`id(`pass), _("User Password"))
-                 ),
+                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("None Autentification")) ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Autentification"), true) ),
+                        `HBox(
+                                `TextEntry(`id(`user_in), _("Username")), `TextEntry(`id(`pass_in), _("Password"))
+                          ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Autentification"), true) ),
+                        `HBox(
+                                `TextEntry(`id(`user_out), _("Username")), `TextEntry(`id(`pass_out), _("Password"))
+                          )
+                  ),
         "init"   : initGlobal,
 //        "handle" : handleGlobal,
         "store"  : storeGlobal,
@@ -246,6 +247,28 @@ void initGlobal (string key){
 }
 
 void storeGlobal(string option_id, map option_map){
+/*
+ if (event["EventReason"]:"" == "ValueChanged"){
+ boolean status = false;
+ switch((symbol)event["ID"]:nil){
+  case(`auth_none):
+                status = (boolean)UI::QueryWidget(`id(`auth_none), `Value);
+                setAuthIn(!status);
+                setAuthOut(!status);
+                break;
+  case(`auth_in):
+                status = (boolean)UI::QueryWidget(`id(`auth_in), `Value);
+                setAuthIn(status);
+                break;
+  case(`auth_out):
+                status = (boolean)UI::QueryWidget(`id(`auth_out), `Value);
+                setAuthOut(status);
+                break;
+  }
+ }
+ return nil;
+*/
+
  if ( size( tostring(UI::QueryWidget(`id(`pass), `Value)) )>0 ){
   switch((symbol)UI::QueryWidget(`id(`auth), `CurrentButton)){
    case(`in)	:
