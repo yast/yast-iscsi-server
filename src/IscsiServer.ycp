@@ -25,7 +25,7 @@ import "Popup";
 
 map <string, any> config_file = $[];
 global map<string, any> config = $[];
-global map<string, any> auth = $[];
+global list<map<string, any> > auth = [];
 
 /**
  * Prototypes
@@ -92,13 +92,14 @@ boolean readConfig(){
  string c_scope="";
  foreach(map<string, any> row, config_file["value"]:[], {
   if (size(c_scope)==0 && ( row["name"]:"" == "IncomingUser" || row["name"]:"" == "OutgoingUser" ))
-				auth = $["KEY":row["name"]:"", "VALUE":row["value"]:""];
+				auth = add(auth, $["KEY":row["name"]:"", "VALUE":row["value"]:""]);
    else if (row["name"]:"" == "Target") {
 			c_scope = row["value"]:"";
 			config[c_scope] = [ $[ "KEY":"Target", "VALUE":row["value"]:"" ] ];
 			}
 	else config[c_scope] = add(config[c_scope]:[], $[ "KEY":row["name"]:"", "VALUE":row["value"]:"" ]);
  });
+y2internal("auth %1", auth);
  return true;
 }
 
@@ -121,7 +122,7 @@ map<string, any> create_map(map<string, any> old_map)
          ];
 }
 
-
+/*
 boolean writeConfig(){
  string c_scope = "";
  list <map<string, any> > tmp2_config = [];
@@ -186,6 +187,7 @@ y2internal("tmp2_config %1", tmp2_config);
  SCR::Write(.etc.ietd.all, config_file);
  return true;
 }
+*/
 
 
 boolean installed_packages(){
@@ -313,7 +315,7 @@ global boolean Write() {
     if(Abort()) return false;
     Progress::NextStage();
     /* Error message */
-    if(writeConfig()==false) Report::Error (_("Cannot write settings."));
+//    if(writeConfig()==false) Report::Error (_("Cannot write settings."));
     sleep(sl);
 
     // run SuSEconfig

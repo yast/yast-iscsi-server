@@ -115,9 +115,9 @@ map<string, map <string, any> > widgets = $[
         "widget" : `custom,
         "custom_widget" :
                  `VBox(
-                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("None Autentification")) ),
+                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("None Autentification"), true) ),
                         `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Autentification"), true) ),
+                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Autentification"), false) ),
                         `VBox(
 				`Table(`id(`incoming_table),
 					`header(_("Username"), _("Password")),
@@ -132,7 +132,7 @@ map<string, map <string, any> > widgets = $[
 			      )
                           ),
                         `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Autentification"), true) ),
+                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Autentification"), false) ),
                         `HBox(
                                 `TextEntry(`id(`user_out), _("Username")), `TextEntry(`id(`pass_out), _("Password"))
                           )
@@ -145,26 +145,25 @@ map<string, map <string, any> > widgets = $[
 //        "label"  : _("Settings of SLP server"),
         "help" : HELPS["global_config"]:""
         ],
-       "server_table" :
-           TablePopup::CreateTableDescr (
-            $["add_delete_buttons" : true, "up_down_buttons" : false, "unique_keys" : true ],
-             $[
-              "init" : initTable,
-//              "store" : storeTable,
-//              "options" : getServerOptions(),
-              "ids" : valuesTable,
-//              "id2key" : Id2Key,
-              "fallback" : $[
-//                "init" : rowInit,
-//                "store" : rowStore,
-//                "summary" : rowSummary,
-                        ],
-//              "option_delete" : rowDelete,
-              "handle" : handleTable,
-//              "add_items" : maplist(string k1, any v1, (map<string,any>) getServerOptions(), ``(k1)),
-              "help" : HELPS["server_table"]:""
-             ]
-            ),
+       "server_table" : $[
+		"widget" : `custom,
+		"custom_widget" :
+		`VBox(
+			`Table(`id(`server),
+				`header(_("Targets")),
+				[]),
+		 `Left(
+		  `HBox(
+		      `PushButton(`id(`add), _("Add")),
+		      `PushButton(`id(`edit), _("Edit")),
+		      `PushButton(`id(`del), _("Delete"))
+		       )
+		      )
+		     ),
+		"init"	: initTable,
+		"handle" : handleTable,
+		"help" : HELPS["server_table"]:""
+	],
 
      "target-add" : $[
         "widget" : `custom,
@@ -187,6 +186,40 @@ map<string, map <string, any> > widgets = $[
         "validate_function" : validateAddTarget,
 //        "label"  : _("Settings of SLP server"),
         "help" : HELPS["target-add"]:""
+        ],
+     "target-auth" : $[
+        "widget" : `custom,
+        "custom_widget" :
+                 `VBox(
+                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("None Autentification"), true) ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Autentification"), false) ),
+                        `VBox(
+				`Table(`id(`incoming_table),
+					`header(_("Username"), _("Password")),
+					 []
+				),
+			  `Left(
+			     `HBox(
+				`PushButton(`id(`add), _("Add")),
+				`PushButton(`id(`edit), _("Edit")),
+				`PushButton(`id(`delete), _("Delete"))
+				)
+			      )
+                          ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Autentification"), false) ),
+                        `HBox(
+                                `TextEntry(`id(`user_out), _("Username")), `TextEntry(`id(`pass_out), _("Password"))
+                          )
+                  ),
+//        "init"   : initGlobal,
+        "handle" : handleAuth,
+//        "store"  : storeGlobal,
+//        "validate_type" : `function,
+//        "validate_function" : validateGlobal,
+//        "label"  : _("Settings of SLP server"),
+        "help" : HELPS["global_config"]:""
         ],
      "target-modify" : $[
         "widget" : `custom,
@@ -214,7 +247,7 @@ map<string, map <string, any> > widgets = $[
 //        "validate_function" : validateAddTarget,
 //        "label"  : _("Settings of SLP server"),
         "help" : HELPS["target-modify"]:""
-        ],
+        ]
 	];
 
 
@@ -273,6 +306,35 @@ any AddDialog(){
     string help = CWM::MergeHelps(w);
     contents = CWM::PrepareDialog(contents, w);
     Wizard::SetContentsButtons(caption, contents, HELPS["target-add"]:"",
+            Label::BackButton(), Label::NextButton());
+
+    any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
+    return ret;
+}
+
+any AuthDialog(){
+     current_tab = "targets";
+    string caption = _("Add iSCSI Target");
+    list<map <string, any> > w = CWM::CreateWidgets (["target-auth"], (map <string, map <string, any> >)widgets);
+        term contents =
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                w[0, "widget"]:`VSpacing (1),
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                               ),
+                          `VStretch()
+                        );
+
+    string help = CWM::MergeHelps(w);
+    contents = CWM::PrepareDialog(contents, w);
+    Wizard::SetContentsButtons(caption, contents, HELPS["target-auth"]:"",
             Label::BackButton(), Label::NextButton());
 
     any ret = CWM::Run(w, $[`abort:ReallyAbort ]);

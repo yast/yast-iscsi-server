@@ -28,7 +28,8 @@ any MainSequence() {
     map aliases = $[
 	"summary"	:   ``( SummaryDialog() ),
 	"add"		:   ``( AddDialog() ),
-	"edit"		:   ``( EditDialog() )
+	"edit"		:   ``( EditDialog() ),
+	"auth"		:   ``( AuthDialog() )
     ];
 
     /* FIXME: adapt to your needs */
@@ -42,13 +43,18 @@ any MainSequence() {
 	],
 	"add"	: $[
 	    `abort	: `abort,
-	    `next	: "summary",
+	    `next	: "auth",
 	    `back	: `back
 	],
 	"edit"	: $[
 	    `abort	: `abort,
 	    `next	: "summary",
 	    `back	: `back
+	],
+	"auth"	: $[
+           `abort      : `abort,
+            `next       : "summary",
+            `back       : `back
 	]
     ];
 

@@ -2,7 +2,7 @@
 
 textdomain "iscsi-server";
 
-list<string> keys = [];
+string curr_target = "";
 string modify_record = "";
 
 
@@ -46,40 +46,136 @@ symbol handleGlobal(string key, map event){
  return nil;
 }
 
-define void initTable (string key) ``{
-    keys = [];
-    foreach(string key, any value, IscsiServer::config, {
-     keys = add(keys, key);
-    });
-    TablePopup::TableInit (CWM::GetProcessedWidget (), key);
+list <string> getDialogValues(string user, string pass){
+
+ UI::OpenDialog( `VBox(
+		   `TextEntry(`id(`p_user),_("Username"), user),
+		   `TextEntry(`id(`p_pass), _("Password"), pass),
+		   `HBox(
+			`PushButton(`id(`ok), _("OK")),
+			`PushButton(`id(`cancel),_("Cancel")))
+			)
+                );
+	boolean cycle = true;
+	while(cycle){
+	switch((symbol) UI::UserInput()){
+	 case(`ok):
+		user = tostring( UI::QueryWidget(`id(`p_user), `Value) );
+		pass = tostring( UI::QueryWidget(`id(`p_pass), `Value) );
+		UI::CloseDialog();
+		cycle = false;
+		break;
+	 case(`cancel):
+		cycle = false;
+		UI::CloseDialog();
+		break;
+	 }
+	}
+ if (size(user)>0 && size(pass)>0) return [user, pass];
+ 	else return [];
 }
 
-define list valuesTable (map descr) {
-  return keys;
+symbol handleAuth(string key, map event){
+ handleGlobal(key, event);
+y2internal("%1", event);
+ if (event["EventReason"]:"" == "Activated"){
+ switch((symbol)event["ID"]:nil){
+  case(`add)	:
+		list<string> values = getDialogValues("", "");
+
+		if (size(values)==2 ){
+		string user = values[0]:"";
+		string pass = values[1]:"";
+		 integer count = size((list)UI::QueryWidget(`id (`incoming_table),`Items));
+		 UI::ChangeWidget (`id (`incoming_table), `Items,
+			add((list)UI::QueryWidget(`id (`incoming_table),`Items), `item(`id(count), user, pass)));
+		}
+
+		y2internal("%1", values);
+		break;
+  case(`edit)	:
+		integer curr = tointeger( UI::QueryWidget(`id (`incoming_table),`CurrentItem) );
+		if (curr!=nil){
+		 string user = ((term)UI::QueryWidget(`id(`incoming_table), `Item(curr)))[1]:"" ;
+		 string pass = ((term)UI::QueryWidget(`id(`incoming_table), `Item(curr)))[2]:"" ;
+		 list<string> values = getDialogValues(user, pass);
+
+                 if (size(values)==2 ){
+                  string user = values[0]:"";
+                  string pass = values[1]:"";
+
+		  list<term> rows = (list<term>)UI::QueryWidget(`id (`incoming_table),`Items);
+		  rows[curr] = `item(`id(curr), user, pass);
+		  UI::ChangeWidget (`id (`incoming_table), `Items, rows);
+                 }
+
+		}
+		break;
+  case(`delete)	:
+		y2internal("delete");
+		break;
+
+  }
+ }
+
+ return nil;
+}
+
+define void initTable (string key) ``{
+    integer count = 0;
+    list <term> inc_items = [];
+ if (size(IscsiServer::config)>0){
+    foreach(string key, any value, IscsiServer::config, {
+     inc_items = add(inc_items, `item(`id(count), key));
+     count = count + 1;
+    });
+  }
+  UI::ChangeWidget(`id(`server), `Items, inc_items);
 }
 
 void initGlobal (string key){
+setAuthIn(false);
+setAuthOut(false);
  if (size(IscsiServer::auth)>0)
   {
    string user = "";
    string pass = "";
-
- list <string> value = splitstring(IscsiServer::auth["VALUE"]:"", " ");
- if (size(value)>0){
-  user = value[0]:"";
-  pass = value[1]:"";
- if (IscsiServer::auth["KEY"]:""=="IncomingUser") UI::ChangeWidget(`id(`incoming_table), `Items, [`item(`id(0), user, pass)]);
-  else if (IscsiServer::auth["KEY"]:""=="OutgoingUser"){
+   list <term> inc_items = [];
+   integer count = 0;
+   foreach(map<string,any> auth, IscsiServer::auth, {
+    y2internal("auth %1", auth);
+    if (auth["KEY"]:"" == "IncomingUser") {
+	user = splitstring(auth["VALUE"]:"", " ")[0]:"";
+	pass = splitstring(auth["VALUE"]:"", " ")[1]:"";
+	inc_items = add(inc_items, `item(`id(count), user,pass) );
+	count = count + 1;
+	setAuthIn(true);
+    }
+    if (auth["KEY"]:"" == "OutgoingUser") {
+	UI::ChangeWidget(`id(`user_out), `Value, splitstring(auth["VALUE"]:"", " ")[0]:"");
+	UI::ChangeWidget(`id(`pass_out), `Value, splitstring(auth["VALUE"]:"", " ")[1]:"");
+	setAuthOut(true);
+    }
+   });
+//y2internal("incom items %1", inc_items);
+UI::ChangeWidget(`id(`incoming_table), `Items, inc_items );
+/*
+   list <string> value = splitstring(IscsiServer::auth["VALUE"]:"", " ");
+   if (size(value)>0){
+    user = value[0]:"";
+    pass = value[1]:"";
+   if (IscsiServer::auth["KEY"]:""=="IncomingUser") UI::ChangeWidget(`id(`incoming_table), `Items, [`item(`id(0), user, pass)]);
+    else if (IscsiServer::auth["KEY"]:""=="OutgoingUser"){
          UI::ChangeWidget(`id(`user_out), `Value, user);
          UI::ChangeWidget(`id(`pass_out), `Value, pass);
         }
- }
-
+       }
+*/
   }
 }
 
 void storeGlobal(string option_id, map option_map){
-
+/*
  if ( size( tostring(UI::QueryWidget(`id(`pass), `Value)) )>0 ){
   switch((symbol)UI::QueryWidget(`id(`auth), `CurrentButton)){
    case(`in)    :
@@ -95,31 +191,41 @@ void storeGlobal(string option_id, map option_map){
                 break;
   }
  } else IscsiServer::auth = $[];
+*/
 }
 
 symbol handleTable (string table, map event){
  symbol ret = nil;
+ if(event["EventReason"]:"" == "Activated"){
  switch((symbol)event["ID"]:nil){
-  case(`_tp_add)        :
+  case(`add)        :
                 y2internal("add");
                 ret = `add;
                 break;
+  case(`del)        :
+                if (Popup::ContinueCancel(_("Really delete this item?"))){
+                 integer del=tointeger( UI::QueryWidget(`id(`server), `CurrentItem) );
+		y2internal("%1", ((term)UI::QueryWidget(`id(`server), `Item(del)))[1]:nil );
+                 IscsiServer::config = remove(IscsiServer::config, ((term)UI::QueryWidget(`id(`server), `Item(del)))[1]:"" );
+		 initTable("");
+                }
+                break;
+  case(`edit)	:
+		integer del=tointeger( UI::QueryWidget(`id(`server), `CurrentItem) );
+		curr_target = ((term)UI::QueryWidget(`id(`server), `Item(del)))[1]:"";
+		y2internal("target - %1", curr_target);
+		y2internal("%1", IscsiServer::config[curr_target]:nil);
+  }
+ y2internal("%1", event);
+
+ }
+
+/*
   case(`_tp_edit)        :
                 modify_record = tostring( UI::QueryWidget(`id(`_tp_table), `CurrentItem) );
                 ret = `edit;
                 break;
-  case(`_tp_delete)        :
-                if (Popup::ContinueCancel(_("Really delete this item?"))){
-                 string del=tostring(UI::QueryWidget(`id(`_tp_table), `CurrentItem));
-                 IscsiServer::config = filter(string key, any value, IscsiServer::config, {return (key != del);});
-                    keys = [];
-                    foreach(string key, any value, IscsiServer::config, {
-                     keys = add(keys, key);
-                    });
-                 TablePopup::TableInit (CWM::GetProcessedWidget (), table);
-                }
-                break;
- }
+*/
  return ret;
 }
 
@@ -169,21 +275,13 @@ boolean validateAddTarget(string key, map event){
  return true;
 }
 define void storeAddTarget(string option_id, map option_map){
- string target = tostring( UI::QueryWidget(`id(`target), `Value)    );
- string pass = tostring(   UI::QueryWidget(`id(`pass), `Value)      );
- string lun = tostring(    UI::QueryWidget(`id(`lun), `Value)       );
-
+ string target = tostring( sformat("%1:%2",UI::QueryWidget(`id(`target), `Value), UI::QueryWidget(`id(`identifier), `Value))    );
+ string lun = sformat("%1 Path=%2,Type=fileio",UI::QueryWidget(`id(`lun), `Value), UI::QueryWidget(`id(`path), `Value) );
   IscsiServer::config[target] = [
                                  $[ "KEY":"Target", "VALUE":target ],
                                  $[ "KEY":"Lun", "VALUE":lun ]
                                 ];
-
- switch( (symbol)UI::QueryWidget(`id(`auth), `CurrentButton) ){
-  case(`in)  : IscsiServer::config[target] = add(IscsiServer::config[target]:[], $[ "KEY":"IncomingUser", "VALUE":pass ]);
-                break;
-  case(`out) : IscsiServer::config[target] = add(IscsiServer::config[target]:[], $[ "KEY":"OutgoingUser", "VALUE":pass ]);
-                break;
- }
+ curr_target = target;
 }
 
 define void initModify (string key) ``{
