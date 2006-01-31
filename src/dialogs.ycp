@@ -19,26 +19,12 @@ import "CWM";
 import "CWMServiceStart";
 import "CWMFirewallInterfaces";
 import "TablePopup";
+
 include "iscsi-server/helps.ycp";
+include "iscsi-server/widgets.ycp";
 
 
-void initTable (string key);
-list<string> keys = [];
-map <string, any> table_rows = $[];
-list valuesTable (map descr);
-string Id2Key( map desc, any option_id );
-string rowSummary(any option_id, string option_type);
-void rowInit (any option_id, string option_type);
-void rowStore (any option_id, string option_type);
-//void storeTable (string key, map event);
-void initGlobal (string key);
-void storeGlobal(string option_id, map option_map);
-symbol handleTable (string table, map event);
-boolean validateAddTarget(string key, map event);
-void storeAddTarget(string option_id, map option_map);
-void initModify(string key);
 string current_tab = "service";
-string modify_record = "";
 
 map tabs_descr = $[
         "service":$[
@@ -103,6 +89,8 @@ map tabs_descr = $[
 
 	];
 
+
+
 map<string, map <string, any> > widgets = $[
             "auto_start_up" : CWMServiceStart::CreateAutoStartWidget ($[
                 "get_service_auto_start" : IscsiServer::GetStartService,
@@ -130,8 +118,18 @@ map<string, map <string, any> > widgets = $[
                         `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("None Autentification")) ),
                         `VSpacing(2),
                         `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Autentification"), true) ),
-                        `HBox(
-                                `TextEntry(`id(`user_in), _("Username")), `TextEntry(`id(`pass_in), _("Password"))
+                        `VBox(
+				`Table(`id(`incoming_table),
+					`header(_("Username"), _("Password")),
+					 []
+				),
+			  `Left(
+			     `HBox(
+				`PushButton(`id(`add), _("Add")),
+				`PushButton(`id(`edit), _("Edit")),
+				`PushButton(`id(`delete), _("Delete"))
+				)
+			      )
                           ),
                         `VSpacing(2),
                         `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Autentification"), true) ),
@@ -140,8 +138,8 @@ map<string, map <string, any> > widgets = $[
                           )
                   ),
         "init"   : initGlobal,
-//        "handle" : handleGlobal,
-        "store"  : storeGlobal,
+        "handle" : handleGlobal,
+//        "store"  : storeGlobal,
 //        "validate_type" : `function,
 //        "validate_function" : validateGlobal,
 //        "label"  : _("Settings of SLP server"),
@@ -172,19 +170,16 @@ map<string, map <string, any> > widgets = $[
         "widget" : `custom,
         "custom_widget" :
                  `VBox(
-		  `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example:storage"),
-                  `RadioButtonGroup
-                    (
-                     `id(`auth),
-                     `VBox(
-		     `Left(`RadioButton(`id(`no), _("No Auth"), true)),
-                     `Left(`RadioButton(`id(`in), _("Incoming"))),
-                     `Left(`RadioButton(`id(`out), _("Outgoing")))
-                     )
-                    ),
-                  `TextEntry(`id(`pass), _("User Password"), "user password"),
-		  `TextEntry(`id(`lun), _("Logical Unit Definition"), "0 Path=/tmp/file,Type=fileio")
+		  `HBox(
+			  `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example"),
+			  `TextEntry(`id(`identifier), _("Identifier"), "storage.disk2.sys1.xyz")
+			),
+		  `HBox(
+			  `TextEntry(`id(`lun), _("LUN"), "0"),
+			  `TextEntry(`id(`path), _("Path"), "/tmp/file")
+			)
                  ),
+
 //        "init"   : initAddTarget,
 //        "handle" : handleAddTarget,
         "store"  : storeAddTarget,
@@ -197,18 +192,20 @@ map<string, map <string, any> > widgets = $[
         "widget" : `custom,
         "custom_widget" :
                  `VBox(
-		  `ReplacePoint(`id(`r_target), `TextEntry(`id(`target), _("Target")) ),
-                  `RadioButtonGroup
-                    (
-                     `id(`auth),
-                     `VBox(
-		     `Left(`RadioButton(`id(`no), _("No Auth"), true)),
-                     `Left(`RadioButton(`id(`in), _("Incoming"))),
-                     `Left(`RadioButton(`id(`out), _("Outgoing")))
-                     )
-                    ),
-                  `ReplacePoint(`id(`r_pass), `TextEntry(`id(`pass), _("User Password")) ),
-		  `ReplacePoint(`id(`r_lun), `TextEntry(`id(`lun), _("Logical Unit Definition")) )
+                  `ReplacePoint(`id(`r_target),
+                 `HBox(
+                          `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example"),
+                          `TextEntry(`id(`identifier), _("Identifier"), "storage.disk2.sys1.xyz")
+                        )
+
+				),
+		  `ReplacePoint(`id(`r_lun),
+                  `HBox(
+                          `TextEntry(`id(`lun), _("LUN"), "0"),
+                          `TextEntry(`id(`path), _("Path"), "/tmp/file")
+                        )
+
+		  )
                  ),
         "init"   : initModify,
 //        "handle" : handleAddTarget,
@@ -220,184 +217,8 @@ map<string, map <string, any> > widgets = $[
         ],
 	];
 
-define void initTable (string key) ``{
-    keys = [];
-    foreach(string key, any value, IscsiServer::config, {
-     keys = add(keys, key);
-    });
-    TablePopup::TableInit (CWM::GetProcessedWidget (), key);
-}
 
-define list valuesTable (map descr) {
-  return keys;
-}
 
-/*
-define void storeTable (string key, map event) ``{
-}
-*/
-
-void initGlobal (string key){
- if (size(IscsiServer::auth)>0)
-  {
-   if (IscsiServer::auth["KEY"]:""=="IncomingUser") UI::ChangeWidget(`id(`auth), `CurrentButton, `in);
-	else if (IscsiServer::auth["KEY"]:""=="OutgoingUser") UI::ChangeWidget(`id(`auth), `CurrentButton, `out);
-   UI::ChangeWidget(`id(`pass), `Value, IscsiServer::auth["VALUE"]:"");
-  }
-}
-
-void storeGlobal(string option_id, map option_map){
-/*
- if (event["EventReason"]:"" == "ValueChanged"){
- boolean status = false;
- switch((symbol)event["ID"]:nil){
-  case(`auth_none):
-                status = (boolean)UI::QueryWidget(`id(`auth_none), `Value);
-                setAuthIn(!status);
-                setAuthOut(!status);
-                break;
-  case(`auth_in):
-                status = (boolean)UI::QueryWidget(`id(`auth_in), `Value);
-                setAuthIn(status);
-                break;
-  case(`auth_out):
-                status = (boolean)UI::QueryWidget(`id(`auth_out), `Value);
-                setAuthOut(status);
-                break;
-  }
- }
- return nil;
-*/
-
- if ( size( tostring(UI::QueryWidget(`id(`pass), `Value)) )>0 ){
-  switch((symbol)UI::QueryWidget(`id(`auth), `CurrentButton)){
-   case(`in)	:
-		IscsiServer::auth["KEY"] = "IncomingUser";
-		IscsiServer::auth["VALUE"] = tostring(UI::QueryWidget(`id(`pass), `Value));
-		break;
-   case(`out)	:
-		IscsiServer::auth["KEY"] = "OutgoingUser";
-		IscsiServer::auth["VALUE"] = tostring(UI::QueryWidget(`id(`pass), `Value));
-		break;
-   case(`no)	:
-		IscsiServer::auth = $[];
-                break;
-  }
- } else IscsiServer::auth = $[];
-}
-
-symbol handleTable (string table, map event){
- symbol ret = nil;
- switch((symbol)event["ID"]:nil){
-  case(`_tp_add)	:
-		y2internal("add");
-		ret = `add;
-		break;
-  case(`_tp_edit)        :
-		modify_record = tostring( UI::QueryWidget(`id(`_tp_table), `CurrentItem) );
-		ret = `edit;
-		break;
-  case(`_tp_delete)        :
-		if (Popup::ContinueCancel(_("Really delete this item?"))){
-		 string del=tostring(UI::QueryWidget(`id(`_tp_table), `CurrentItem));
-		 IscsiServer::config = filter(string key, any value, IscsiServer::config, {return (key != del);});
-		    keys = [];
-		    foreach(string key, any value, IscsiServer::config, {
-		     keys = add(keys, key);
-		    });
-		 TablePopup::TableInit (CWM::GetProcessedWidget (), table);
-		}
-		break;
- }
- return ret;
-}
-
-boolean if_exists(string key, string value){
- boolean ret = false;
- foreach(string target, any row,IscsiServer::config, {
-  foreach( map<string, any> v, (list<map<string, any> >)row, {
-   if ( v["KEY"]:"" == key && v["VALUE"]:"" == value){
-    ret = true;
-    break;
-   }
-  });
- });
- return ret;
-}
-
-boolean validateAddTarget(string key, map event){
- string target = tostring( UI::QueryWidget(`id(`target), `Value)    );
- string pass = tostring(   UI::QueryWidget(`id(`pass), `Value)      );
- string lun = tostring(    UI::QueryWidget(`id(`lun), `Value)       );
- string type = "no";
-
- switch( (symbol)UI::QueryWidget(`id(`auth), `CurrentButton) ){
-  case(`in)  : type = "in";
-		break;
-  case(`out) : type = "out";
-		break;
- }
-
- if (( size(target)==0 && (Popup::Error(_("Target cannot be Empty"))==nil) ) ||
-	( if_exists("Target", target) && (Popup::Error(_("Target already exists"))==nil) )){
-  UI::SetFocus(`id(`target));
-  return false;
- }
-
- if (type != "no" && size(pass)==0){
-  Popup::Error(_("Username and password cannot be empty."));
-  UI::SetFocus(`id(`pass));
-  return false;
- }
-
- if ((size(lun)==0 && (Popup::Error(_("Logical unit definition cannot be empty."))==nil))||
-	( if_exists("Lun", lun) && (Popup::Error(_("Logical unit already exists."))==nil))){
-  UI::SetFocus(`id(`lun));
-  return false;
- }
- return true;
-}
-
-define void storeAddTarget(string option_id, map option_map){
- string target = tostring( UI::QueryWidget(`id(`target), `Value)    );
- string pass = tostring(   UI::QueryWidget(`id(`pass), `Value)      );
- string lun = tostring(    UI::QueryWidget(`id(`lun), `Value)       );
-
-  IscsiServer::config[target] = [
-				 $[ "KEY":"Target", "VALUE":target ],
-				 $[ "KEY":"Lun", "VALUE":lun ]
-				];
-
- switch( (symbol)UI::QueryWidget(`id(`auth), `CurrentButton) ){
-  case(`in)  : IscsiServer::config[target] = add(IscsiServer::config[target]:[], $[ "KEY":"IncomingUser", "VALUE":pass ]);
-                break;
-  case(`out) : IscsiServer::config[target] = add(IscsiServer::config[target]:[], $[ "KEY":"OutgoingUser", "VALUE":pass ]);
-                break;
- }
-}
-
-define void initModify (string key) ``{
- foreach( map<string, any> row, (list<map<string, any> >) IscsiServer::config[modify_record]:[], {
-  y2internal("%1", row);
-  switch(row["KEY"]:""){
-   case("Target")	:
-				UI::ReplaceWidget(`id(`r_target), `TextEntry(`id(`target), _("Target"), row["VALUE"]:"") );
-				UI::ChangeWidget( `id(`r_target), `Enabled, false);
-				break;
-   case("Lun")		:
-                                UI::ReplaceWidget(`id(`r_lun), `TextEntry(`id(`lun), _("Logical Unit Definition"), row["VALUE"]:"") );
-                                break;
-   case("IncomingUser")	:
-				UI::ChangeWidget( `id(`auth), `CurrentButton, `in);
-				UI::ReplaceWidget(`id(`r_pass), `TextEntry(`id(`pass), _("User Password"), row["VALUE"]:"") );
-                                break;
-   case("OutgoingUser")	:
-				UI::ChangeWidget( `id(`auth), `CurrentButton, `out);
-				UI::ReplaceWidget(`id(`r_pass), `TextEntry(`id(`pass), _("User Password"), row["VALUE"]:"") );
-                                break;
-  }
- });
-}
 
 /**
  * Summary dialog
