@@ -213,9 +213,9 @@ map<string, map <string, any> > widgets = $[
                                 `TextEntry(`id(`user_out), _("Username")), `TextEntry(`id(`pass_out), _("Password"))
                           )
                   ),
-//        "init"   : initGlobal,
+        "init"   : initGlobal,
         "handle" : handleAuth,
-//        "store"  : storeGlobal,
+        "store"  : storeGlobal,
 //        "validate_type" : `function,
 //        "validate_function" : validateGlobal,
 //        "label"  : _("Settings of SLP server"),
@@ -253,7 +253,7 @@ map<string, map <string, any> > widgets = $[
  */
 any SummaryDialog() {
     string caption = _("iSCSI Server Overview");
-
+    curr_target = "";
     map widget_descr = $[
         "tab": CWMTab::CreateWidget($[
             "tab_order": [ "service", "global", "targets" ],

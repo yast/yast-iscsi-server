@@ -48,7 +48,7 @@ any MainSequence() {
 	],
 	"edit"	: $[
 	    `abort	: `abort,
-	    `next	: "summary",
+	    `next	: "auth",
 	    `back	: `back
 	],
 	"auth"	: $[

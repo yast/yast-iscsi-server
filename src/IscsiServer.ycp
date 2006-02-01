@@ -124,6 +124,7 @@ map<string, any> create_map(map<string, any> old_map)
 
 /*
 boolean writeConfig(){
+
  string c_scope = "";
  list <map<string, any> > tmp2_config = [];
  list <string> used_scopes = [];
