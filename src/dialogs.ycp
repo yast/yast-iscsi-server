@@ -138,8 +138,8 @@ map<string, map <string, any> > widgets = $[
                           )
                   ),
         "init"   : initGlobal,
-        "handle" : handleGlobal,
-//        "store"  : storeGlobal,
+        "handle" : handleAuth,
+        "store"  : storeGlobal,
 //        "validate_type" : `function,
 //        "validate_function" : validateGlobal,
 //        "label"  : _("Settings of SLP server"),
@@ -225,20 +225,14 @@ map<string, map <string, any> > widgets = $[
         "widget" : `custom,
         "custom_widget" :
                  `VBox(
-                  `ReplacePoint(`id(`r_target),
                  `HBox(
-                          `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example"),
-                          `TextEntry(`id(`identifier), _("Identifier"), "storage.disk2.sys1.xyz")
-                        )
-
-				),
-		  `ReplacePoint(`id(`r_lun),
+                          `TextEntry(`id(`target), _("Target")),
+                          `TextEntry(`id(`identifier), _("Identifier"))
+                        ),
                   `HBox(
-                          `TextEntry(`id(`lun), _("LUN"), "0"),
-                          `TextEntry(`id(`path), _("Path"), "/tmp/file")
+                          `TextEntry(`id(`lun), _("LUN")),
+                          `TextEntry(`id(`path), _("Path"))
                         )
-
-		  )
                  ),
         "init"   : initModify,
 //        "handle" : handleAddTarget,
@@ -269,7 +263,7 @@ any SummaryDialog() {
             "tab_help" : _("<h1>iSCSI Server</h1>"),
         ]),
     ];
-    term contents = `VBox( "tab"/*, `VStretch ()*/);
+    term contents = `VBox( "tab" );
 
     list<map <string, any> > w = CWM::CreateWidgets (["tab"], (map <string, map <string, any> >)widget_descr);
     string help = CWM::MergeHelps(w);
