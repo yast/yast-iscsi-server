@@ -85,11 +85,11 @@ boolean if_exists(string key, string value){
 
 //	**************** Server Dialog	*********************
 
-define void initTable (string key) ``{
+void initTable (string key) ``{
     integer count = 0;
     list <term> inc_items = [];
- if (size(IscsiServer::config)>0){
-    foreach(string key, any value, IscsiServer::config, {
+ if (size(IscsiServer::removeKey("auth"))>0){
+    foreach(string key, any value, IscsiServer::removeKey("auth"), {
      inc_items = add(inc_items, `item(`id(count), key));
      count = count + 1;
     });
@@ -129,7 +129,6 @@ void initGlobalValues(list<map<string, any> > values){
    string pass = "";
    list <term> inc_items = [];
    integer count = 0;
-y2internal("%1", values);
    foreach(map<string,any> auth, values, {
     if (auth["KEY"]:"" == "IncomingUser") {
 	user = splitstring(auth["VALUE"]:"", " ")[0]:"";
@@ -148,13 +147,11 @@ y2internal("%1", values);
 }
 
 void initGlobal (string key){
-y2internal("%1", curr_target);
  if (size(curr_target)>0) initGlobalValues(IscsiServer::config[curr_target]:[]);
-	else if (size(IscsiServer::auth)>0) initGlobalValues(IscsiServer::auth);
+	else if (size(IscsiServer::config["auth"]:[])>0) initGlobalValues(IscsiServer::config["auth"]:[]);
 }
 
 void storeGlobal(string option_id, map option_map){
-y2internal("curr_target%1", curr_target);
  if (size(curr_target)>0){
   list<map<string, any> > old = [];
   if(size(IscsiServer::config[curr_target]:[])>0){
@@ -163,7 +160,6 @@ y2internal("curr_target%1", curr_target);
    });
   }
      IscsiServer::config[curr_target] = old;
-y2internal("inc values %1", getIncomingValues());
    foreach(string row,  getIncomingValues(), {
     IscsiServer::config[curr_target] = add(IscsiServer::config[curr_target]:[], $[ "KEY":"IncomingUser", "VALUE":row ]);
    });
@@ -173,18 +169,21 @@ y2internal("inc values %1", getIncomingValues());
 
 
  } else{
-   IscsiServer::auth = [];
+   IscsiServer::config["auth"] = [];
    foreach(string row,  getIncomingValues(), {
-    IscsiServer::auth = add(IscsiServer::auth, $[ "KEY":"IncomingUser", "VALUE":row ]);
+    IscsiServer::config["auth"] = add(IscsiServer::config["auth"]:[], $[ "KEY":"IncomingUser", "VALUE":row ]);
    });
   string out = getOutgoingValues();
-  if (size(out)>0) IscsiServer::auth = add(IscsiServer::auth, $[ "KEY":"OutgoingUser", "VALUE":out ]);
+  if (size(out)>0) IscsiServer::config["auth"] = add(IscsiServer::config["auth"]:[], $[ "KEY":"OutgoingUser", "VALUE":out ]);
  }
 }
 
 //	************** Add Target Dialog	******************
+void initAddTarget(string key){
+ UI::ChangeWidget(`id(`lun), `Value, tostring( IscsiServer::getHighestLun() + 1));
+}
 
-define void storeAddTarget(string option_id, map option_map){
+void storeAddTarget(string option_id, map option_map){
  list<map<string, any> > old = [];
  string target = tostring( sformat("%1:%2",UI::QueryWidget(`id(`target), `Value), UI::QueryWidget(`id(`identifier), `Value))    );
  string lun = sformat("%1 Path=%2,Type=fileio",UI::QueryWidget(`id(`lun), `Value), UI::QueryWidget(`id(`path), `Value) );
@@ -295,7 +294,7 @@ symbol handleAuth(string key, map event){
 }
 
 //	**************** Edit Dialog	*****************************
-define void initModify (string key) ``{
+void initModify (string key) ``{
  foreach( map<string, any> row, (list<map<string, any> >) IscsiServer::config[curr_target]:[], {
   switch(row["KEY"]:""){
    case("Target")       :
@@ -309,7 +308,8 @@ define void initModify (string key) ``{
 		list<string> lun = splitstring(row["VALUE"]:"", " ");
 		UI::ChangeWidget(`id(`lun), `Value, lun[0]:"");
                 UI::ChangeWidget(`id(`lun),`Enabled, false);
-		UI::ChangeWidget(`id(`path), `Value, (splitstring(lun[1]:"", ","))[0]:"" );
+		string full_path = (splitstring(lun[1]:"", ","))[0]:"";
+		UI::ChangeWidget(`id(`path), `Value, (splitstring(full_path, "="))[1]:"" );
                 break;
   }
  });

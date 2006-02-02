@@ -171,7 +171,7 @@ map<string, map <string, any> > widgets = $[
                  `VBox(
 		  `HBox(
 			  `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example"),
-			  `TextEntry(`id(`identifier), _("Identifier"), "storage.disk2.sys1.xyz")
+			  `TextEntry(`id(`identifier), _("Identifier"), "test")
 			),
 		  `HBox(
 			  `TextEntry(`id(`lun), _("LUN"), "0"),
@@ -179,7 +179,7 @@ map<string, map <string, any> > widgets = $[
 			)
                  ),
 
-//        "init"   : initAddTarget,
+        "init"   : initAddTarget,
 //        "handle" : handleAddTarget,
         "store"  : storeAddTarget,
         "validate_type" : `function,

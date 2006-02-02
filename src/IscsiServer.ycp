@@ -25,7 +25,6 @@ import "Popup";
 
 map <string, any> config_file = $[];
 global map<string, any> config = $[];
-global list<map<string, any> > auth = [];
 
 /**
  * Prototypes
@@ -89,17 +88,14 @@ global boolean Modified() {
 
 boolean readConfig(){
  config_file = (map<string, any>)SCR::Read(.etc.ietd.all);
- string c_scope="";
+ string c_scope="auth";
  foreach(map<string, any> row, config_file["value"]:[], {
-  if (size(c_scope)==0 && ( row["name"]:"" == "IncomingUser" || row["name"]:"" == "OutgoingUser" ))
-				auth = add(auth, $["KEY":row["name"]:"", "VALUE":row["value"]:""]);
-   else if (row["name"]:"" == "Target") {
+  if (row["name"]:"" == "Target") {
 			c_scope = row["value"]:"";
 			config[c_scope] = [ $[ "KEY":"Target", "VALUE":row["value"]:"" ] ];
 			}
 	else config[c_scope] = add(config[c_scope]:[], $[ "KEY":row["name"]:"", "VALUE":row["value"]:"" ]);
  });
-y2internal("auth %1", auth);
  return true;
 }
 
@@ -111,9 +107,34 @@ boolean find_in(map<string, any> my_conf, string to_find){
  return ret;
 }
 
-map<string, any> create_map(map<string, any> old_map)
+map<string, any> removeKeyFromMap(map<string,any>myMap,string key){
+ map <string, any> conf_map = $[];
+ foreach(string k, any v, myMap, {
+  if (k != key) conf_map[k] = v;
+ });
+ return conf_map;
+}
+
+global map<string, any> removeKey(string key){
+ return removeKeyFromMap(config, key);
+}
+
+global integer getHighestLun(){
+ integer lun = 0;
+ foreach(string key, list<map<string, any> > val, (map<string, list<map<string, any> > >)removeKey("auth"), {
+  foreach(map<string, any> row,val, {
+   if (row["KEY"]:""=="Lun"){
+    integer curr_lun = 0;
+    curr_lun = tointeger((splitstring(row["VALUE"]:"", " "))[0]:"0");
+    if (curr_lun > lun) lun = curr_lun;
+   }
+  });
+ });
+ return lun;
+}
+
+map<string, any> createMap(map<string, any> old_map)
 {
- y2internal("old map %1", old_map);
  return $[ "name":old_map["KEY"]:"",
            "value":old_map["VALUE"]:"",
            "kind":"value",
@@ -122,71 +143,69 @@ map<string, any> create_map(map<string, any> old_map)
          ];
 }
 
+list<string> getKeys(map<string, any> searched){
+ list<string> keys = [];
+ foreach(string s, any a, searched, {
+  keys = add(keys, s);
+ });
+ return keys;
+}
+
+map<string, any> addToConfig( map<string, any> m_config_file, string key){
+ list <map<string, any> > new_list = [];
+ foreach(map<string, any> row, config[key]:[], {
+  new_list = add(new_list, createMap(row));
+ });
+ m_config_file[key] = new_list;
+ return m_config_file;
+}
+
 boolean writeConfig(){
+ string c_scope = "auth";
+ map<string, any> m_config_file = $[];
 
- string c_scope = "";
- list <map<string, any> > tmp2_config = [];
- list <string> used_scopes = [];
- list <map<string, any> > need_keys = [];
-
-y2internal("auth %1", auth);
 
  foreach(map<string, any> row, config_file["value"]:[], {
-
-  if ( c_scope=="" && row["name"]:"" != "Target" ) {
-   if (size(auth)>0){
-y2internal("%1", row);
- /*
-    row["name"] = auth["KEY"]:"";
-    row["value"] = auth["VALUE"]:"";
-    tmp2_config = add(tmp2_config, row);
-*/
+  if ( c_scope=="auth" && row["name"]:"" != "Target" ) { m_config_file["auth"] = add(m_config_file["auth"]:[], row);
    }
-  } else
-     if (row["name"]:"" == "Target"){
-/*
-	if (size(auth)>0 && size(tmp2_config)==0){
-	 row["name"] = auth["KEY"]:"";
-	 row["value"] = auth["VALUE"]:"";
-	 tmp2_config = add(tmp2_config, row);
-	}
-*/
-      need_keys = maplist(map<string, any> my_map, need_keys, { return create_map(my_map);});
-      tmp2_config = (list<map<string, any> >)flatten([ tmp2_config, need_keys ]);
-      c_scope  = row["value"]:"";
-      used_scopes = add( used_scopes, c_scope );
-    need_keys = config[c_scope]:[];
-     } else
-	{
-	 list <string> used_keys = [];
-	 foreach(map<string, any> m, config[c_scope]:[], {
-	 if (m["KEY"]:"" == row["name"]:"") {
-	   row["value"] = m["VALUE"]:"";
-	  }
-	   used_keys = add(used_keys, m["KEY"]:"");
-	 });
-	 if ((find_in(config, c_scope)) && (contains(used_keys, row["name"]:""))) {
-							}
-	}
+  if (row["name"]:"" == "Target"){ 
+    c_scope = row["value"]:"";
+    m_config_file[c_scope] = add(m_config_file[c_scope]:[], row);
+   } else if(c_scope!="auth"){ m_config_file[c_scope] = add(m_config_file[c_scope]:[], row);
+  }
  });
 
- need_keys = maplist(map<string, any> my_map, need_keys, { return create_map(my_map);});
- tmp2_config = (list<map<string, any> >)flatten([ tmp2_config, need_keys ]);
-y2internal("tmp2_config %1", tmp2_config);
-
- foreach(string key, any value, config, {
-  if (!contains(used_scopes, key)){
-	list <map<string, any> > tmp1_config = [];
-	foreach(map<string, any>  row, config[key]:[], {
-	 tmp1_config = add( tmp1_config, create_map(row) );
-	});
-	tmp2_config = (list<map<string, any> >)flatten([ tmp2_config, tmp1_config ]);
-       }
+ foreach(string old_key, getKeys(config), {
+  if(size(config[old_key]:[])==0) config = removeKey(old_key);
  });
- config_file["value"] = tmp2_config;
- y2internal("final write %1", tmp2_config);
+ foreach(string old_key, getKeys(config), {
+  if(!( contains(getKeys(m_config_file), old_key) )){
+   m_config_file = addToConfig( m_config_file, old_key );
+  } else {
+    foreach(map<string, any> new_list, config[old_key]:[], {
+     foreach(map<string, any> old_list, m_config_file[old_key]:[], {
+      if((new_list["KEY"]:"" !="IncomingUser") && (new_list["KEY"]:"" == old_list["KEY"]:"")) new_list = old_list;
+     });
+     y2internal("%1", new_list);
+     
+    });
+    }
+  //y2internal("to compare %1\n%2", m_config_file[old_key]:[], config[old_key]:[]);
+ });
 
-// SCR::Write(.etc.ietd.all, config_file);
+ foreach(string old_key, getKeys(m_config_file), {
+  if(!( contains(getKeys(config), old_key) )){
+   m_config_file = removeKeyFromMap(m_config_file, old_key);
+  }
+ });
+
+ config_file["value"] = m_config_file["auth"]:[];
+
+ foreach(string key, any val, removeKeyFromMap(m_config_file, "auth"), {
+  config_file["value"] = flatten([ config_file["value"]:[], (list<map<string, any> >)val ]);
+ });
+SCR::Write(.etc.ietd.all, config_file);
+
  return true;
 }
 
