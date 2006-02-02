@@ -40,12 +40,12 @@ An additional dialog informs whether it is safe to do so.
 
     /* Summary dialog help 1/3 */
     "summary" : _("<p><b><big>iSCSI Server Configuration</big></b><br>
-Configure iSCSI Server here.<br></p>
+Configure an iSCSI server here.<br></p>
 ") +
 
     /* Summary dialog help 2/3 */
     _("<p><b><big>Adding an iSCSI Server</big></b><br>
-Choose an iSCSI Server from the list of detected iscsi-servers.
+Choose an iSCSI server from the list of detected iSCSI servers.
 If your server was not detected, use <b>Other (not detected)</b>.
 Then press <b>Configure</b>.</p>
 ") +
@@ -58,17 +58,17 @@ the configuration opens.</p>
 
     /* Ovreview dialog help 1/3 */
     "overview" : _("<p><b><big>iSCSI Server Configuration Overview</big></b><br>
-Obtain an overview of installed iSCSI Servers. Additionally
+Obtain an overview of installed iSCSI servers. Additionally
 edit their configurations.<br></p>
 ") +
 
     /* Ovreview dialog help 2/3 */
-_("<p><b><big>Adding a iSCSI Server</big></b><br>
-Press <b>Add</b> to configure an iSCSI Server.</p>") +
+_("<p><b><big>Adding an iSCSI Server</big></b><br>
+Press <b>Add</b> to configure an iSCSI server.</p>") +
 
     /* Ovreview dialog help 3/3 */
 _("<p><b><big>Editing or Deleting:</big></b><br>
-Choose an iSCSI Server to change or remove.
+Choose an iSCSI server to change or remove.
 Then press <b>Edit</b> or <b>Delete</b> as desired.</p>
 "),
 
@@ -99,12 +99,12 @@ For Incoming is possible to <b>Add</b> more  pairs, <b>Edit</b> and <b>Delete</b
 	"server_table" :_("List of offered targets. Create new target by click <b>Add</b>. 
 For delete and modify select an item and press <b>Modify</b> or <b>Delete</b>"),
 
-	"target-modify":	_("<h1>open iSCSI</h1>") + _("Possible to change <b>Path</b> to block devices, regular files, LVM, or RAID.
+	"target-modify":	_("<h1>open iSCSI</h1>") + _("It is possible to change the <b>Path</b> to block devices, regular files, LVM, or RAID.
 "),
 
-	"target-add":	_("<h1>open iSCSI</h1>") + _("Create new target. Replace template values with real.
-For <b>Target</b> use format : iqn.yyyy-mm.<reversed domain name>.
-For <b>Path</b> use block devices, regular files, LVM, or RAID.
+	"target-add":	_("<h1>open iSCSI</h1>") + _("Create a new target. Replace template values with real.
+For <b>Target</b>, use format : iqn.yyyy-mm.<reversed domain name>.
+For <b>Path</b>, use block devices, regular files, LVM, or RAID.
 "),
 
 ];

@@ -204,13 +204,13 @@ boolean validateAddTarget(string key, map event){
  string target = tostring( UI::QueryWidget(`id(`target), `Value)    );
  string lun = tostring(    UI::QueryWidget(`id(`lun), `Value)       );
  string type = "no";
- if (( size(target)==0 && (Popup::Error(_("Target cannot be Empty"))==nil) ) ||
-        ( if_exists("Target", target) && (Popup::Error(_("Target already exists"))==nil) )){
+ if (( size(target)==0 && (Popup::Error(_("The target cannot be Empty"))==nil) ) ||
+        ( if_exists("Target", target) && (Popup::Error(_("The target already exists"))==nil) )){
   UI::SetFocus(`id(`target));
   return false;
  }
- if ((size(lun)==0 && (Popup::Error(_("Logical unit definition cannot be empty."))==nil))||
-        ( if_exists("Lun", lun) && (Popup::Error(_("Logical unit already exists."))==nil))){
+ if ((size(lun)==0 && (Popup::Error(_("The logical unit definition cannot be empty."))==nil))||
+        ( if_exists("Lun", lun) && (Popup::Error(_("The logical unit already exists."))==nil))){
   UI::SetFocus(`id(`lun));
   return false;
  }
