@@ -93,17 +93,18 @@ _("<p><b><big>Selecting Something</big></b><br>
 It is not possible. You must code it first. :-)
 </p>"),
 
-	"global_config"	: _("Select type of authentication. If any, fill <b>User</b> and <b>Password</b> delimited by space.  "),
+	"global_config"	: _("Select type of authentication. Use <b>None</b> or one of <b>Incoming</b> and <b>Outgoing</b> (can be both together). Then insert <b>User</b> and <b>Password</b>. 
+For Incoming is possible to <b>Add</b> more  pairs, <b>Edit</b> and <b>Delete</b> them."),
 
 	"server_table" :_("List of offered targets. Create new target by click <b>Add</b>. 
 For delete and modify select an item and press <b>Modify</b> or <b>Delete</b>"),
 
-	"target-modify":	_("<h1>open iSCSI</h1>") + _("Possible to change autentification type, 
-Username and Password, delimited by space. Also change Logical Unit Definition is possible."),
+	"target-modify":	_("<h1>open iSCSI</h1>") + _("Possible to change <b>Path</b> to block devices, regular files, LVM, or RAID.
+"),
 
 	"target-add":	_("<h1>open iSCSI</h1>") + _("Create new target. Replace template values with real.
-Possible to change autentification type,
-Username and Password, delimited by space. Also change Logical Unit Definition is possible.
+For <b>Target</b> use format : iqn.yyyy-mm.<reversed domain name>.
+For <b>Path</b> use block devices, regular files, LVM, or RAID.
 "),
 
 ];

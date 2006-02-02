@@ -122,7 +122,6 @@ map<string, any> create_map(map<string, any> old_map)
          ];
 }
 
-/*
 boolean writeConfig(){
 
  string c_scope = "";
@@ -132,23 +131,26 @@ boolean writeConfig(){
 
 y2internal("auth %1", auth);
 
-
-
  foreach(map<string, any> row, config_file["value"]:[], {
 
   if ( c_scope=="" && row["name"]:"" != "Target" ) {
    if (size(auth)>0){
+y2internal("%1", row);
+ /*
     row["name"] = auth["KEY"]:"";
     row["value"] = auth["VALUE"]:"";
     tmp2_config = add(tmp2_config, row);
+*/
    }
   } else
      if (row["name"]:"" == "Target"){
+/*
 	if (size(auth)>0 && size(tmp2_config)==0){
 	 row["name"] = auth["KEY"]:"";
 	 row["value"] = auth["VALUE"]:"";
 	 tmp2_config = add(tmp2_config, row);
 	}
+*/
       need_keys = maplist(map<string, any> my_map, need_keys, { return create_map(my_map);});
       tmp2_config = (list<map<string, any> >)flatten([ tmp2_config, need_keys ]);
       c_scope  = row["value"]:"";
@@ -169,7 +171,6 @@ y2internal("auth %1", auth);
  });
 
  need_keys = maplist(map<string, any> my_map, need_keys, { return create_map(my_map);});
-// tmp1_config = (list<map<string, any> >)flatten([ tmp1_config, need_keys ]);
  tmp2_config = (list<map<string, any> >)flatten([ tmp2_config, need_keys ]);
 y2internal("tmp2_config %1", tmp2_config);
 
@@ -185,10 +186,9 @@ y2internal("tmp2_config %1", tmp2_config);
  config_file["value"] = tmp2_config;
  y2internal("final write %1", tmp2_config);
 
- SCR::Write(.etc.ietd.all, config_file);
+// SCR::Write(.etc.ietd.all, config_file);
  return true;
 }
-*/
 
 
 boolean installed_packages(){
@@ -316,7 +316,7 @@ global boolean Write() {
     if(Abort()) return false;
     Progress::NextStage();
     /* Error message */
-//    if(writeConfig()==false) Report::Error (_("Cannot write settings."));
+    if(writeConfig()==false) Report::Error (_("Cannot write settings."));
     sleep(sl);
 
     // run SuSEconfig

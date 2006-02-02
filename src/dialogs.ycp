@@ -328,7 +328,7 @@ any AuthDialog(){
 
     string help = CWM::MergeHelps(w);
     contents = CWM::PrepareDialog(contents, w);
-    Wizard::SetContentsButtons(caption, contents, HELPS["target-auth"]:"",
+    Wizard::SetContentsButtons(caption, contents, HELPS["global_config"]:"",
             Label::BackButton(), Label::NextButton());
 
     any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
