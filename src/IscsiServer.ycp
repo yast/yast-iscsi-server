@@ -133,13 +133,17 @@ global integer getHighestLun(){
  return lun;
 }
 
-map<string, any> createMap(map<string, any> old_map)
+map<string, any> createMap(map<string, any> old_map, list<string> comments)
 {
+ string comment = "";
+ foreach(string row, comments, {
+  comment = sformat("%1%2", comment, row);
+  });
  return $[ "name":old_map["KEY"]:"",
            "value":old_map["VALUE"]:"",
            "kind":"value",
            "type":1,
-           "comment":""
+           "comment":comment
          ];
 }
 
@@ -154,11 +158,12 @@ list<string> getKeys(map<string, any> searched){
 map<string, any> addToConfig( map<string, any> m_config_file, string key){
  list <map<string, any> > new_list = [];
  foreach(map<string, any> row, config[key]:[], {
-  new_list = add(new_list, createMap(row));
+  new_list = add(new_list, createMap(row, []));
  });
  m_config_file[key] = new_list;
  return m_config_file;
 }
+
 
 boolean writeConfig(){
  string c_scope = "auth";
@@ -182,15 +187,26 @@ boolean writeConfig(){
   if(!( contains(getKeys(m_config_file), old_key) )){
    m_config_file = addToConfig( m_config_file, old_key );
   } else {
-    foreach(map<string, any> new_list, config[old_key]:[], {
+
+     map<string, any> comments = $[];
      foreach(map<string, any> old_list, m_config_file[old_key]:[], {
-      if((new_list["KEY"]:"" !="IncomingUser") && (new_list["KEY"]:"" == old_list["KEY"]:"")) new_list = old_list;
-     });
-     y2internal("%1", new_list);
-     
-    });
+      string key = old_list["name"]:"";
+      comments[key] = add(comments[key]:[], old_list["comment"]:"");
+      });
+     list<map<string, any> > new = [];
+     foreach(map<string, any> old_map, config[old_key]:[], {
+      string key = old_map["KEY"]:"";
+y2internal("%1", comments[key]:nil);
+      if (size(comments[key]:[])>0){
+      new = add(new,
+		createMap(old_map, comments[key]:[]));
+      comments = removeKeyFromMap(comments,key);
+       } else new = add(new,
+			createMap(old_map, comments[key]:[]));
+      });
+y2internal("%1", new);
+	m_config_file[old_key] = new;
     }
-  //y2internal("to compare %1\n%2", m_config_file[old_key]:[], config[old_key]:[]);
  });
 
  foreach(string old_key, getKeys(m_config_file), {
