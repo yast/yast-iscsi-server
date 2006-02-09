@@ -25,6 +25,7 @@ import "Popup";
 
 map <string, any> config_file = $[];
 global map<string, any> config = $[];
+boolean serviceStatus = false;
 
 /**
  * Prototypes
@@ -238,6 +239,19 @@ boolean installed_packages(){
  return ret;
 }
 
+boolean getServiceStatus(){
+ boolean ret = true;
+ if (Service::Status("iscsitarget") == 0) serviceStatus=true;
+y2internal("Service status = %1", serviceStatus);
+ if (!serviceStatus) Service::Start("iscsitarget");
+ return ret;
+}
+
+boolean setServiceStatus(){
+ boolean ret = true;
+ if (!serviceStatus) Service::Stop("iscsitarget");
+ return ret;
+}
 
 /**
  * Read all iscsi-server settings
@@ -280,28 +294,31 @@ global boolean Read() {
     if(Abort()) return false;
     Progress::NextStage();
     /* Error message */
-    if(readConfig()==false) Report::Error(_("Cannot read database1."));
+    if(!installed_packages()) return false;
     sleep(sl);
 
     // read another database
     if(Abort()) return false;
     Progress::NextStep();
     /* Error message */
-    if(false) Report::Error(_("Cannot read database2."));
+    if(!getServiceStatus()) return false;
     sleep(sl);
 
     // read current settings
     if(Abort()) return false;
     Progress::NextStage();
     /* Error message */
-    if(false) Report::Error(Message::CannotReadCurrentSettings());
+    if(!readConfig()) {
+	 Report::Error(Message::CannotReadCurrentSettings());
+	 return false;
+	}
     sleep(sl);
 
     // detect devices
     if(Abort()) return false;
     Progress::NextStage();
     /* Error message */
-    if(!installed_packages()) return false;
+    if(false) return false;
     sleep(sl);
 
     if(Abort()) return false;
@@ -366,7 +383,7 @@ global boolean Write() {
     Progress::NextStage();
     sleep(sl);
 
-    if(Abort()) return false;
+    if(!setServiceStatus()) return false;
     return true;
 }
 
