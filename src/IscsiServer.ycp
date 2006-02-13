@@ -4,7 +4,7 @@
  * Summary:	IscsiServer settings, input and output functions
  * Authors:	Michal Zugec <mzugec@suse.cz>
  *
- * $Id: IscsiServer.ycp 23442 2005-05-18 07:46:28Z visnov $
+ * $Id$
  *
  * Representation of the configuration of iscsi-server.
  * Input and output routines.
