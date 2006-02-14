@@ -1,0 +1,368 @@
+/**
+ * File:	include/iscsi-server/dialogs.ycp
+ * Package:	Configuration of iscsi-server
+ * Summary:	Dialogs definitions
+ * Authors:	Michal Zugec <mzugec@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "iscsi-server";
+
+import "Label";
+import "Wizard";
+import "IscsiServer";
+import "CWMTab";
+import "CWM";
+import "CWMServiceStart";
+import "CWMFirewallInterfaces";
+import "TablePopup";
+
+include "iscsi-server/helps.ycp";
+include "iscsi-server/widgets.ycp";
+
+
+string current_tab = "service";
+
+map tabs_descr = $[
+        "service":$[
+         "header"       : _("Service"),
+         "contents"     :
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                "auto_start_up",
+                                `VSpacing (2),
+                                "firewall",
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                              ),
+                          `VStretch()
+                        ),
+         "widget_names" : [ "auto_start_up", "firewall" ]
+         ],
+        "global":$[
+         "header"       : _("Global"),
+         "contents"     :
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+				"global_config",
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                              ),
+                          `VStretch()
+                        ),
+         "widget_names" : [ "global_config" ]
+         ],
+        "targets":$[
+         "header"       : _("Targets"),
+         "contents"     :
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                "server_table",
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                               ),
+                          `VStretch()
+                        ),
+         "widget_names" : [ "server_table" ]
+        ]
+
+	];
+
+
+
+map<string, map <string, any> > widgets = $[
+            "auto_start_up" : CWMServiceStart::CreateAutoStartWidget ($[
+                "get_service_auto_start" : IscsiServer::GetStartService,
+                "set_service_auto_start" : IscsiServer::SetStartService,
+                // radio button (starting SLP service - option 1)
+                "start_auto_button" : _("When &Booting"),
+                // radio button (starting SLP service - option 2)
+                "start_manual_button" : _("&Manually"),
+                "help" : sformat (CWMServiceStart::AutoStartHelpTemplate (),
+                    // part of help text, used to describe radiobuttons (matching starting SLP service but without "&")
+                    _("When Booting"),
+                    // part of help text, used to describe radiobuttons (matching starting SLP service but without "&")
+                    _("Manually")
+                ),
+            ]),
+
+	"firewall" : CWMFirewallInterfaces::CreateOpenFirewallWidget ($[
+	        "services" : [ "open-iscsi" ],
+	        "display_details" : true,
+	      ]),
+     "global_config" : $[
+        "widget" : `custom,
+        "custom_widget" :
+                 `VBox(
+                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("No Authentication"), true) ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Authentication"), false) ),
+                        `VBox(
+				`Table(`id(`incoming_table),
+					`header(_("Username"), _("Password")),
+					 []
+				),
+			  `Left(
+			     `HBox(
+				`PushButton(`id(`add), _("Add")),
+				`PushButton(`id(`edit), _("Edit")),
+				`PushButton(`id(`delete), _("Delete"))
+				)
+			      )
+                          ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Authentication"), false) ),
+                        `HBox(
+                                `TextEntry(`id(`user_out), _("Username")), `TextEntry(`id(`pass_out), _("Password"))
+                          )
+                  ),
+        "init"   : initGlobal,
+        "handle" : handleAuth,
+        "store"  : storeGlobal,
+//        "validate_type" : `function,
+//        "validate_function" : validateGlobal,
+//        "label"  : _("Settings of SLP server"),
+        "help" : HELPS["global_config"]:""
+        ],
+       "server_table" : $[
+		"widget" : `custom,
+		"custom_widget" :
+		`VBox(
+			`Table(`id(`server),
+				`header(_("Targets")),
+				[]),
+		 `Left(
+		  `HBox(
+		      `PushButton(`id(`add), _("Add")),
+		      `PushButton(`id(`edit), _("Edit")),
+		      `PushButton(`id(`del), _("Delete"))
+		       )
+		      )
+		     ),
+		"init"	: initTable,
+		"handle" : handleTable,
+		"help" : HELPS["server_table"]:""
+	],
+
+     "target-add" : $[
+        "widget" : `custom,
+        "custom_widget" :
+                 `VBox(
+		  `HBox(
+			  `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example"),
+			  `TextEntry(`id(`identifier), _("Identifier"), "test")
+			),
+		  `HBox(
+			  `TextEntry(`id(`lun), _("LUN"), "0"),
+			  `TextEntry(`id(`path), _("Path"), "/tmp/file")
+			)
+                 ),
+
+        "init"   : initAddTarget,
+//        "handle" : handleAddTarget,
+        "store"  : storeAddTarget,
+        "validate_type" : `function,
+        "validate_function" : validateAddTarget,
+//        "label"  : _("Settings of SLP server"),
+        "help" : HELPS["target-add"]:""
+        ],
+     "target-auth" : $[
+        "widget" : `custom,
+        "custom_widget" :
+                 `VBox(
+                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("None Autentification"), true) ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Autentification"), false) ),
+                        `VBox(
+				`Table(`id(`incoming_table),
+					`header(_("Username"), _("Password")),
+					 []
+				),
+			  `Left(
+			     `HBox(
+				`PushButton(`id(`add), _("Add")),
+				`PushButton(`id(`edit), _("Edit")),
+				`PushButton(`id(`delete), _("Delete"))
+				)
+			      )
+                          ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Autentification"), false) ),
+                        `HBox(
+                                `TextEntry(`id(`user_out), _("Username")), `TextEntry(`id(`pass_out), _("Password"))
+                          )
+                  ),
+        "init"   : initGlobal,
+        "handle" : handleAuth,
+        "store"  : storeGlobal,
+//        "validate_type" : `function,
+//        "validate_function" : validateGlobal,
+//        "label"  : _("Settings of SLP server"),
+        "help" : HELPS["global_config"]:""
+        ],
+     "target-modify" : $[
+        "widget" : `custom,
+        "custom_widget" :
+                 `VBox(
+                 `HBox(
+                          `TextEntry(`id(`target), _("Target")),
+                          `TextEntry(`id(`identifier), _("Identifier"))
+                        ),
+                  `HBox(
+                          `TextEntry(`id(`lun), _("LUN")),
+                          `TextEntry(`id(`path), _("Path"))
+                        )
+                 ),
+        "init"   : initModify,
+//        "handle" : handleAddTarget,
+        "store"  : storeAddTarget,
+//        "validate_type" : `function,
+//        "validate_function" : validateAddTarget,
+//        "label"  : _("Settings of SLP server"),
+        "help" : HELPS["target-modify"]:""
+        ]
+	];
+
+
+
+
+/**
+ * Summary dialog
+ * @return dialog result
+ */
+any SummaryDialog() {
+    string caption = _("iSCSI Server Overview");
+    curr_target = "";
+    map widget_descr = $[
+        "tab": CWMTab::CreateWidget($[
+            "tab_order": [ "service", "global", "targets" ],
+            "tabs": tabs_descr,
+            "widget_descr": widgets,
+            "initial_tab" : current_tab,
+            "tab_help" : _("<h1>iSCSI Server</h1>"),
+        ]),
+    ];
+    term contents = `VBox( "tab" );
+
+    list<map <string, any> > w = CWM::CreateWidgets (["tab"], (map <string, map <string, any> >)widget_descr);
+    string help = CWM::MergeHelps(w);
+    contents = CWM::PrepareDialog(contents, w);
+
+    Wizard::SetContentsButtons(caption, contents, help, Label::NextButton (), Label::FinishButton ());
+    Wizard::HideBackButton();
+
+    symbol ret = CWM::Run(w, $[`abort:ReallyAbort ]);
+
+    return ret;
+}
+
+any AddDialog(){
+     current_tab = "targets";
+    string caption = _("Add iSCSI Target");
+    list<map <string, any> > w = CWM::CreateWidgets (["target-add"], (map <string, map <string, any> >)widgets);
+        term contents =
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                w[0, "widget"]:`VSpacing (1),
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                               ),
+                          `VStretch()
+                        );
+
+    string help = CWM::MergeHelps(w);
+    contents = CWM::PrepareDialog(contents, w);
+    Wizard::SetContentsButtons(caption, contents, HELPS["target-add"]:"",
+            Label::BackButton(), Label::NextButton());
+
+    any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
+    return ret;
+}
+
+any AuthDialog(){
+     current_tab = "targets";
+    string caption = _("Add iSCSI Target");
+    list<map <string, any> > w = CWM::CreateWidgets (["target-auth"], (map <string, map <string, any> >)widgets);
+        term contents =
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                w[0, "widget"]:`VSpacing (1),
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                               ),
+                          `VStretch()
+                        );
+
+    string help = CWM::MergeHelps(w);
+    contents = CWM::PrepareDialog(contents, w);
+    Wizard::SetContentsButtons(caption, contents, HELPS["global_config"]:"",
+            Label::BackButton(), Label::NextButton());
+
+    any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
+    return ret;
+}
+
+any EditDialog(){
+     current_tab = "targets";
+    string caption = _("Modify iSCSI Target");
+    list<map <string, any> > w = CWM::CreateWidgets (["target-modify"], (map <string, map <string, any> >)widgets);
+        term contents =
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                w[0, "widget"]:`VSpacing (1),
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                               ),
+                          `VStretch()
+                        );
+
+    string help = CWM::MergeHelps(w);
+    contents = CWM::PrepareDialog(contents, w);
+    Wizard::SetContentsButtons(caption, contents, HELPS["target-modify"]:"",
+            Label::BackButton(), Label::NextButton());
+
+    any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
+    return ret;
+}
+
+/* EOF */
+}
