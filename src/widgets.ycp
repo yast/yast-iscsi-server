@@ -180,6 +180,17 @@ void storeGlobal(string option_id, map option_map){
 
 //	************** Add Target Dialog	******************
 void initAddTarget(string key){
+ string target = "iqn";
+ string date = ((map<string, any>)SCR::Execute(.target.bash_output, "date +%Y-%m"))["stdout"]:"";
+ string domain = ((map<string, any>)SCR::Execute(.target.bash_output, "dnsdomainname"))["stdout"]:"";
+ if (size(domain)>0){
+  domain = (splitstring(domain, "\n"))[0]:"";
+  list<string> tmp_list=splitstring(domain, ".");
+  domain = sformat("%1.%2", tmp_list[1]:"", tmp_list[0]:"");
+ } else domain="com.example";
+ target = sformat("%1.%2.%3", target, date, domain);
+ UI::ChangeWidget(`id(`target), `Value, target);
+
  UI::ChangeWidget(`id(`lun), `Value, tostring( IscsiServer::getHighestLun() + 1));
 }
 
