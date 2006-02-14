@@ -188,7 +188,8 @@ void initAddTarget(string key){
   list<string> tmp_list=splitstring(domain, ".");
   domain = sformat("%1.%2", tmp_list[1]:"", tmp_list[0]:"");
  } else domain="com.example";
- target = sformat("%1.%2.%3", target, date, domain);
+ target = deletechars(sformat("%1.%2.%3", target, date, domain), "\n");
+ 
  UI::ChangeWidget(`id(`target), `Value, target);
 
  UI::ChangeWidget(`id(`lun), `Value, tostring( IscsiServer::getHighestLun() + 1));
