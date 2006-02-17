@@ -108,7 +108,7 @@ map<string, map <string, any> > widgets = $[
             ]),
 
 	"firewall" : CWMFirewallInterfaces::CreateOpenFirewallWidget ($[
-	        "services" : [ "open-iscsi" ],
+	        "services" : [ "iscsi-server" ],
 	        "display_details" : true,
 	      ]),
      "global_config" : $[

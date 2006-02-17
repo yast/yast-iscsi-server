@@ -22,6 +22,7 @@ import "Message";
 import "Service";
 import "Package";
 import "Popup";
+import "SuSEFirewall";
 
 map <string, any> config_file = $[];
 global map<string, any> config = $[];
@@ -315,7 +316,11 @@ global boolean Read() {
     sleep(sl);
 
     // detect devices
-    if(Abort()) return false;
+//    if(Abort()) return false;
+        Progress::set(false);
+        SuSEFirewall::Read();
+        Progress::set(true);
+
     Progress::NextStage();
     /* Error message */
     if(false) return false;
@@ -365,7 +370,11 @@ global boolean Write() {
     );
 
     // write settings
-    if(Abort()) return false;
+//    if(Abort()) return false;
+        Progress::set(false);
+        SuSEFirewall::Write();
+        Progress::set(true);
+
     Progress::NextStage();
     /* Error message */
     if(writeConfig()==false) Report::Error (_("Cannot write settings."));
