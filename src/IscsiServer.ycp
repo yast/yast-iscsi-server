@@ -231,7 +231,7 @@ SCR::Write(.etc.ietd.all, config_file);
 boolean installed_packages(){
  boolean ret = false;
   if( !Package::InstallMsg( "iscsitarget",
-            _("<p>To configure the SLP server, the <b>%1</b> packages must be installed.</p>") +
+            _("<p>To configure the SLP server, the <b>%1</b> package must be installed.</p>") +
             _("<p>Install it now?</p>")) )
         {
         Popup::Error( Message::CannotContinueWithoutPackagesInstalled() );
@@ -371,6 +371,14 @@ global boolean Write() {
 
     // write settings
 //    if(Abort()) return false;
+
+if (Popup::YesNo(_(
+"If changes have been made, the iSCSI server is not able \n"
+"to reload current configuration. It can only restart.\n"
+"When restarting, all sessions are aborted.\n"
+"Restart the iscsitarget service?"
+))) Service::Restart("iscsitarget");
+
         Progress::set(false);
         SuSEFirewall::Write();
         Progress::set(true);

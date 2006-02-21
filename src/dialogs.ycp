@@ -191,9 +191,9 @@ map<string, map <string, any> > widgets = $[
         "widget" : `custom,
         "custom_widget" :
                  `VBox(
-                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("None Autentification"), true) ),
+                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("No Authentication"), true) ),
                         `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Autentification"), false) ),
+                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Authentication"), false) ),
                         `VBox(
 				`Table(`id(`incoming_table),
 					`header(_("Username"), _("Password")),
@@ -208,7 +208,7 @@ map<string, map <string, any> > widgets = $[
 			      )
                           ),
                         `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Autentification"), false) ),
+                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Authentication"), false) ),
                         `HBox(
                                 `TextEntry(`id(`user_out), _("Username")), `TextEntry(`id(`pass_out), _("Password"))
                           )

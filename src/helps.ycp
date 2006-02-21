@@ -22,7 +22,7 @@ Please wait...<br></p>
 ") +
 
     /* Read dialog help 2/2 */
-    _("<p><b><big>Aborting Initialization:</big></b><br>
+    _("<p><b><big>Aborting Initialization</big></b><br>
 Safely abort the configuration utility by pressing <b>Abort</b> now.</p>
 "),
 
@@ -51,7 +51,7 @@ Then press <b>Configure</b>.</p>
 ") +
 
     /* Summary dialog help 3/3 */
-    _("<p><b><big>Editing or Deleting:</big></b><br>
+    _("<p><b><big>Editing or Deleting</big></b><br>
 If you press <b>Edit</b>, an additional dialog in which to change
 the configuration opens.</p>
 "),
@@ -93,19 +93,22 @@ _("<p><b><big>Selecting Something</big></b><br>
 It is not possible. You must code it first. :-)
 </p>"),
 
-	"global_config"	: _("Select type of authentication. Use <b>None</b> or one of <b>Incoming</b> and <b>Outgoing</b> (can be both together). Then insert <b>User</b> and <b>Password</b>. 
-For Incoming is possible to <b>Add</b> more  pairs, <b>Edit</b> and <b>Delete</b> them."),
+	"global_config"	: _(
+"Select the type of authentication. Use <b>No Authentication</b> or one of <b>Incoming</b> and <b>Outgoing</b> (can be both together). Then insert <b>User</b> and <b>Password</b>. \n"
+"For incoming authentication, it is possible to <b>Add</b> more  pairs and <b>Edit</b> and <b>Delete</b> them."),
 
-	"server_table" :_("List of offered targets. Create new target by click <b>Add</b>. 
-For delete and modify select an item and press <b>Modify</b> or <b>Delete</b>"),
+	"server_table" :_(
+"List of offered targets. Create a new target by clicking <b>Add</b>. \n"
+"To delete or modify an item, select it and press <b>Modify</b> or <b>Delete</b>."
+),
 
-	"target-modify":	_("<h1>open iSCSI</h1>") + _("It is possible to change the <b>Path</b> to block devices, regular files, LVM, or RAID.
+	"target-modify":	_("<h1>iSCSI Server</h1>") + _("It is possible to change the <b>Path</b> to block devices, regular files, LVM, or RAID.
 "),
 
-	"target-add":	_("<h1>open iSCSI</h1>") + _("Create a new target. Replace template values with real.
-For <b>Target</b>, use format : iqn.yyyy-mm.<reversed domain name>.
-For <b>Path</b>, use block devices, regular files, LVM, or RAID.
-"),
+	"target-add":	_("<h1>iSCSI Server</h1>") + _(
+"Create a new target. Replace template values with the correct values.\n"
+"For <b>Target</b>, use the format iqn.yyyy-mm.<reversed domain name>.\n"
+"For <b>Path</b>, use block devices, regular files, LVM, or RAID.\n"),
 
 ];
 

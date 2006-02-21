@@ -216,8 +216,8 @@ boolean validateAddTarget(string key, map event){
  string target = tostring( UI::QueryWidget(`id(`target), `Value)    );
  string lun = tostring(    UI::QueryWidget(`id(`lun), `Value)       );
  string type = "no";
- if (( size(target)==0 && (Popup::Error(_("The target cannot be Empty"))==nil) ) ||
-        ( if_exists("Target", target) && (Popup::Error(_("The target already exists"))==nil) )){
+ if (( size(target)==0 && (Popup::Error(_("The target cannot be empty."))==nil) ) ||
+        ( if_exists("Target", target) && (Popup::Error(_("The target already exists."))==nil) )){
   UI::SetFocus(`id(`target));
   return false;
  }
