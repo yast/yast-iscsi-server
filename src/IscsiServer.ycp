@@ -223,6 +223,7 @@ y2internal("%1", new);
   config_file["value"] = flatten([ config_file["value"]:[], (list<map<string, any> >)val ]);
  });
 SCR::Write(.etc.ietd.all, config_file);
+SCR::Write(.etc.ietd, nil);
 
  return true;
 }
