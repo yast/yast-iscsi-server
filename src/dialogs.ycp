@@ -184,7 +184,6 @@ map<string, map <string, any> > widgets = $[
         "store"  : storeAddTarget,
         "validate_type" : `function,
         "validate_function" : validateAddTarget,
-//        "label"  : _("Settings of SLP server"),
         "help" : HELPS["target-add"]:""
         ],
      "target-auth" : $[
@@ -218,7 +217,6 @@ map<string, map <string, any> > widgets = $[
         "store"  : storeGlobal,
 //        "validate_type" : `function,
 //        "validate_function" : validateGlobal,
-//        "label"  : _("Settings of SLP server"),
         "help" : HELPS["global_config"]:""
         ],
      "target-modify" : $[
@@ -239,7 +237,6 @@ map<string, map <string, any> > widgets = $[
         "store"  : storeAddTarget,
 //        "validate_type" : `function,
 //        "validate_function" : validateAddTarget,
-//        "label"  : _("Settings of SLP server"),
         "help" : HELPS["target-modify"]:""
         ]
 	];
@@ -252,7 +249,7 @@ map<string, map <string, any> > widgets = $[
  * @return dialog result
  */
 any SummaryDialog() {
-    string caption = _("iSCSI Server Overview");
+    string caption = _("iSCSI Target Overview");
     curr_target = "";
     map widget_descr = $[
         "tab": CWMTab::CreateWidget($[
@@ -260,7 +257,7 @@ any SummaryDialog() {
             "tabs": tabs_descr,
             "widget_descr": widgets,
             "initial_tab" : current_tab,
-            "tab_help" : _("<h1>iSCSI Server</h1>"),
+            "tab_help" : _("<h1>iSCSI Target</h1>"),
         ]),
     ];
     term contents = `VBox( "tab" );
