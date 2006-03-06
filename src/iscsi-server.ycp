@@ -31,7 +31,7 @@ include "iscsi-server/wizards.ycp";
 map cmdline_description = $[
     "id" 	: "iscsi-server",
     /* Command line help text for the Xiscsi-server module */
-    "help"	: _("Configuration of an iSCSI server"),
+    "help"	: _("Configuration of an iSCSI target"),
     "guihandler"        : IscsiServerSequence,
     "initialize"        : IscsiServer::Read,
     "finish"            : IscsiServer::Write,

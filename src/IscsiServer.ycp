@@ -232,7 +232,7 @@ SCR::Write(.etc.ietd, nil);
 boolean installed_packages(){
  boolean ret = false;
   if( !Package::InstallMsg( "iscsitarget",
-            _("<p>To configure the SLP server, the <b>%1</b> package must be installed.</p>") +
+            _("<p>To configure the iSCSI Target, the <b>%1</b> package must be installed.</p>") +
             _("<p>Install it now?</p>")) )
         {
         Popup::Error( Message::CannotContinueWithoutPackagesInstalled() );
@@ -262,7 +262,7 @@ boolean setServiceStatus(){
 global boolean Read() {
 
     /* IscsiServer read dialog caption */
-    string caption = _("Initializing iSCSI Server Configuration");
+    string caption = _("Initializing iSCSI Target Configuration");
 
     // TODO FIXME Set the right number of stages
     integer steps = 4;
@@ -344,7 +344,7 @@ global boolean Read() {
 global boolean Write() {
 
     /* IscsiServer read dialog caption */
-    string caption = _("Saving iSCSI Server Configuration");
+    string caption = _("Saving iSCSI Target Configuration");
 
     // TODO FIXME And set the right number of stages
     integer steps = 2;
@@ -374,7 +374,7 @@ global boolean Write() {
 //    if(Abort()) return false;
 
 if (Popup::YesNo(_(
-"If changes have been made, the iSCSI server is not able \n"
+"If changes have been made, the iSCSI target is not able \n"
 "to reload current configuration. It can only restart.\n"
 "When restarting, all sessions are aborted.\n"
 "Restart the iscsitarget service?"
