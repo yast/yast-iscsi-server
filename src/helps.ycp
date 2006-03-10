@@ -67,7 +67,7 @@ _("<p><b><big>Adding an iSCSI Target</big></b><br>
 Press <b>Add</b> to configure an iSCSI target.</p>") +
 
     /* Ovreview dialog help 3/3 */
-_("<p><b><big>Editing or Deleting:</big></b><br>
+_("<p><b><big>Editing or Deleting</big></b><br>
 Choose an iSCSI target to change or remove.
 Then press <b>Edit</b> or <b>Delete</b> as desired.</p>
 "),
