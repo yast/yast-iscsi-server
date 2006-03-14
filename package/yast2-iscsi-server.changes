@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar 14 14:49:37 CET 2006 - mzugec@suse.cz
+
+- fixed #157645 LUN counting starts from zero 
+
+-------------------------------------------------------------------
 Tue Mar 14 14:40:49 CET 2006 - mzugec@suse.cz
 
 - fixed #157653 - use UUID with iqn 
