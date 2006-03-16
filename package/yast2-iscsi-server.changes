@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar 16 17:20:11 CET 2006 - mzugec@suse.cz
+
+- fixed #158538 - write before restart server 
+
+-------------------------------------------------------------------
 Tue Mar 14 14:49:37 CET 2006 - mzugec@suse.cz
 
 - fixed #157645 LUN counting starts from zero 

@@ -373,12 +373,6 @@ global boolean Write() {
     // write settings
 //    if(Abort()) return false;
 
-if (Popup::YesNo(_(
-"If changes have been made, the iSCSI target is not able \n"
-"to reload current configuration. It can only restart.\n"
-"When restarting, all sessions are aborted.\n"
-"Restart the iscsitarget service?"
-))) Service::Restart("iscsitarget");
 
         Progress::set(false);
         SuSEFirewall::Write();
@@ -388,6 +382,13 @@ if (Popup::YesNo(_(
     /* Error message */
     if(writeConfig()==false) Report::Error (_("Cannot write settings."));
     sleep(sl);
+
+if (Popup::YesNo(_(
+"If changes have been made, the iSCSI target is not able \n"
+"to reload current configuration. It can only restart.\n"
+"When restarting, all sessions are aborted.\n"
+"Restart the iscsitarget service?"
+))) Service::Restart("iscsitarget");
 
     // run SuSEconfig
     if(Abort()) return false;
