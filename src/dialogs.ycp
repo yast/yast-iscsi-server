@@ -134,7 +134,7 @@ map<string, map <string, any> > widgets = $[
                         `VSpacing(2),
                         `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Authentication"), false) ),
                         `HBox(
-                                `TextEntry(`id(`user_out), _("Username")), `TextEntry(`id(`pass_out), _("Password"))
+                                `TextEntry(`id(`user_out), _("Username")), `Password(`id(`pass_out), _("Password"))
                           )
                   ),
         "init"   : initGlobal,
@@ -209,7 +209,7 @@ map<string, map <string, any> > widgets = $[
                         `VSpacing(2),
                         `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Authentication"), false) ),
                         `HBox(
-                                `TextEntry(`id(`user_out), _("Username")), `TextEntry(`id(`pass_out), _("Password"))
+                                `TextEntry(`id(`user_out), _("Username")), `Password(`id(`pass_out), _("Password"))
                           )
                   ),
         "init"   : initGlobal,

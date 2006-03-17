@@ -5,7 +5,7 @@ textdomain "iscsi-server";
 //	**************** global funcions and variables	*****
 string curr_target = "";
 string modify_record = "";
-
+map inc_auth = $[];
 
 void setAuthIn(boolean status){
  UI::ChangeWidget(`id(`incoming_table),`Enabled, status );
@@ -28,9 +28,18 @@ void setAuthOut(boolean status){
 list<string> getIncomingValues(){
  list <string> values = [];
  if ((boolean)UI::QueryWidget(`id(`auth_in), `Value) == true){
+/*
   foreach(term row, (list<term>)UI::QueryWidget(`id(`incoming_table), `Items), {
    values=add(values, sformat("%1 %2", row[1]:"", row[2]:""));
   });
+*/
+ integer count = -1;
+ while (count<size(inc_auth)-1){
+  count = count+1;
+//  inc_items = add(inc_items, `item(`id(count),inc_auth[count, "USER"]:"", "*****"));
+values=add(values, sformat("%1 %2", inc_auth[count, "USER"]:"", inc_auth[count, "PASS"]:""));
+ }
+
  return values;
  } else return [];
 }
@@ -45,7 +54,7 @@ list <string> getDialogValues(string user, string pass){
 
  UI::OpenDialog( `VBox(
 		   `TextEntry(`id(`p_user),_("Username"), user),
-		   `TextEntry(`id(`p_pass), _("Password"), pass),
+		   `Password(`id(`p_pass), _("Password"), pass),
 		   `HBox(
 			`PushButton(`id(`ok), _("OK")),
 			`PushButton(`id(`cancel),_("Cancel")))
@@ -121,19 +130,29 @@ symbol handleTable (string table, map event){
  return ret;
 }
 
+list <term> getAuthItems(){
+ list <term> inc_items = [];
+ integer count = -1;
+ while (count<size(inc_auth)-1){
+  count = count+1;
+  inc_items = add(inc_items, `item(`id(count),inc_auth[count, "USER"]:"", "*****"));
+ }
+ return inc_items;
+}
+
 //	**************** Global Dialog	*********************
 void initGlobalValues(list<map<string, any> > values){
   setAuthIn(false);
   setAuthOut(false);
    string user = "";
    string pass = "";
-   list <term> inc_items = [];
+   inc_auth = $[];
    integer count = 0;
    foreach(map<string,any> auth, values, {
     if (auth["KEY"]:"" == "IncomingUser") {
 	user = splitstring(auth["VALUE"]:"", " ")[0]:"";
 	pass = splitstring(auth["VALUE"]:"", " ")[1]:"";
-	inc_items = add(inc_items, `item(`id(count), user,pass) );
+	inc_auth[count] = $["USER":user, "PASS":pass];
 	count = count + 1;
 	setAuthIn(true);
     }
@@ -143,7 +162,7 @@ void initGlobalValues(list<map<string, any> > values){
 	setAuthOut(true);
     }
    });
-   UI::ChangeWidget(`id(`incoming_table), `Items, inc_items );
+   UI::ChangeWidget(`id(`incoming_table), `Items, getAuthItems() );
 }
 
 void initGlobal (string key){
@@ -260,16 +279,20 @@ symbol handleAuth(string key, map event){
 		string user = values[0]:"";
 		string pass = values[1]:"";
 		 integer count = size((list)UI::QueryWidget(`id (`incoming_table),`Items));
-		 UI::ChangeWidget (`id (`incoming_table), `Items,
-			add((list)UI::QueryWidget(`id (`incoming_table),`Items), `item(`id(count), user, pass)));
+
+
+		inc_auth[size(inc_auth)]= $["USER":user, "PASS":pass];
+		 UI::ChangeWidget (`id (`incoming_table), `Items, getAuthItems());
+
+//			add((list)UI::QueryWidget(`id (`incoming_table),`Items), `item(`id(count), user, pass)));
 		}
 
 		break;
   case(`edit)	:
 		integer curr = tointeger( UI::QueryWidget(`id (`incoming_table),`CurrentItem) );
 		if (curr!=nil){
-		 string user = ((term)UI::QueryWidget(`id(`incoming_table), `Item(curr)))[1]:"" ;
-		 string pass = ((term)UI::QueryWidget(`id(`incoming_table), `Item(curr)))[2]:"" ;
+		 string user = inc_auth[curr, "USER"]:"";  //((term)UI::QueryWidget(`id(`incoming_table), `Item(curr)))[1]:"" ;
+		 string pass = inc_auth[curr, "PASS"]:"";//((term)UI::QueryWidget(`id(`incoming_table), `Item(curr)))[2]:"" ;
 		 list<string> values = getDialogValues(user, pass);
 
                  if (size(values)==2 ){
@@ -277,8 +300,8 @@ symbol handleAuth(string key, map event){
                   string pass = values[1]:"";
 
 		  list<term> rows = (list<term>)UI::QueryWidget(`id (`incoming_table),`Items);
-		  rows[curr] = `item(`id(curr), user, pass);
-		  UI::ChangeWidget (`id (`incoming_table), `Items, rows);
+		  inc_auth[curr] = $["USER":user, "PASS":pass];
+		  UI::ChangeWidget (`id (`incoming_table), `Items, getAuthItems());
                  }
 
 		}
@@ -289,14 +312,15 @@ symbol handleAuth(string key, map event){
 		 if (Popup::ContinueCancel(_("Really delete the selected item?")))
 		  {
 		   integer count = 0;
-		   list<term> new_rows = [];
-		   foreach(term row, (list<term>)UI::QueryWidget(`id (`incoming_table),`Items), {
-		    if( tointeger(((term)row[0]:nil)[0]:nil) != tointeger(del)){
-		     new_rows = add(new_rows, `item(`id(count), row[1]:"", row[2]:""));
-		     count = count + 1;
-		    }
-		   });
-		  UI::ChangeWidget(`id(`incoming_table), `Items, new_rows);
+			map<integer, any> temp_map = $[];
+			while(count<size(inc_auth)){
+			 if (count<del) temp_map[count]=inc_auth[count]:nil;
+				else if (count==del) {}
+					else temp_map[count-1]=inc_auth[count]:nil;
+			 count = count+1;
+			}
+			inc_auth = temp_map;
+		  UI::ChangeWidget(`id(`incoming_table), `Items, getAuthItems());
 		  }
 		}
 		break;

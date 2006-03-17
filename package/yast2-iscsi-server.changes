@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Mar 17 18:54:54 CET 2006 - mzugec@suse.cz
+
+- fixed #158540 - hide passwords 
+
+-------------------------------------------------------------------
 Thu Mar 16 17:20:11 CET 2006 - mzugec@suse.cz
 
 - fixed #158538 - write before restart server 
