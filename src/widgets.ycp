@@ -1,6 +1,7 @@
 {
 
 textdomain "iscsi-server";
+import "IscsiServerFunctions";
 
 //	**************** global funcions and variables	*****
 string curr_target = "";
@@ -28,19 +29,12 @@ void setAuthOut(boolean status){
 list<string> getIncomingValues(){
  list <string> values = [];
  if ((boolean)UI::QueryWidget(`id(`auth_in), `Value) == true){
-/*
-  foreach(term row, (list<term>)UI::QueryWidget(`id(`incoming_table), `Items), {
-   values=add(values, sformat("%1 %2", row[1]:"", row[2]:""));
-  });
-*/
  integer count = -1;
  while (count<size(inc_auth)-1){
-  count = count+1;
-//  inc_items = add(inc_items, `item(`id(count),inc_auth[count, "USER"]:"", "*****"));
-values=add(values, sformat("%1 %2", inc_auth[count, "USER"]:"", inc_auth[count, "PASS"]:""));
- }
-
- return values;
+   count = count+1;
+   values=add(values, sformat("%1 %2", inc_auth[count, "USER"]:"", inc_auth[count, "PASS"]:""));
+  }
+  return values;
  } else return [];
 }
 
@@ -51,7 +45,6 @@ string getOutgoingValues(){
 }
 
 list <string> getDialogValues(string user, string pass){
-
  UI::OpenDialog( `VBox(
 		   `TextEntry(`id(`p_user),_("Username"), user),
 		   `Password(`id(`p_pass), _("Password"), pass),
@@ -79,26 +72,13 @@ list <string> getDialogValues(string user, string pass){
 	else return [];
 }
 
-boolean if_exists(string key, string value){
- boolean ret = false;
- foreach(string target, any row,IscsiServer::config, {
-  foreach( map<string, any> v, (list<map<string, any> >)row, {
-   if ( v["KEY"]:"" == key && v["VALUE"]:"" == value){
-    ret = true;
-    break;
-   }
-  });
- });
- return ret;
-}
-
 //	**************** Server Dialog	*********************
 
 void initTable (string key) ``{
     integer count = 0;
     list <term> inc_items = [];
- if (size(IscsiServer::removeKey("auth"))>0){
-    foreach(string key, any value, IscsiServer::removeKey("auth"), {
+ if (size(IscsiServerFunctions::removeKey("auth"))>0){
+    foreach(string key, any value, IscsiServerFunctions::removeKey("auth"), {
      inc_items = add(inc_items, `item(`id(count), key));
      count = count + 1;
     });
@@ -116,13 +96,13 @@ symbol handleTable (string table, map event){
   case(`del)        :
                 if (Popup::ContinueCancel(_("Really delete this item?"))){
                  integer del=tointeger( UI::QueryWidget(`id(`server), `CurrentItem) );
-                 IscsiServer::config = remove(IscsiServer::config, ((term)UI::QueryWidget(`id(`server), `Item(del)))[1]:"" );
+                 IscsiServerFunctions::removeConfig( ((term)UI::QueryWidget(`id(`server), `Item(del)))[1]:"" );
 		 initTable("");
                 }
                 break;
   case(`edit)	:
-		integer del=tointeger( UI::QueryWidget(`id(`server), `CurrentItem) );
-		curr_target = ((term)UI::QueryWidget(`id(`server), `Item(del)))[1]:"";
+		integer edit=tointeger( UI::QueryWidget(`id(`server), `CurrentItem) );
+		curr_target = ((term)UI::QueryWidget(`id(`server), `Item(edit)))[1]:"";
 		ret = `edit;
 		break;
   }
@@ -142,6 +122,7 @@ list <term> getAuthItems(){
 
 //	**************** Global Dialog	*********************
 void initGlobalValues(list<map<string, any> > values){
+y2internal("values %1", values);
   setAuthIn(false);
   setAuthOut(false);
    string user = "";
@@ -166,34 +147,15 @@ void initGlobalValues(list<map<string, any> > values){
 }
 
 void initGlobal (string key){
- if (size(curr_target)>0) initGlobalValues(IscsiServer::config[curr_target]:[]);
-	else if (size(IscsiServer::config["auth"]:[])>0) initGlobalValues(IscsiServer::config["auth"]:[]);
+ if (size(curr_target)>0) initGlobalValues(IscsiServerFunctions::getConfig()[curr_target]:[]);
+	else if (size(IscsiServerFunctions::getConfig()["auth"]:[])>0) initGlobalValues(IscsiServerFunctions::getConfig()["auth"]:[]);
 }
 
 void storeGlobal(string option_id, map option_map){
  if (size(curr_target)>0){
-  list<map<string, any> > old = [];
-  if(size(IscsiServer::config[curr_target]:[])>0){
-  foreach(map<string, any> row, IscsiServer::config[curr_target]:[], {
-    if ( (row["KEY"]:""=="Target")||(row["KEY"]:""=="Lun") ) old = add(old, row);
-   });
-  }
-     IscsiServer::config[curr_target] = old;
-   foreach(string row,  getIncomingValues(), {
-    IscsiServer::config[curr_target] = add(IscsiServer::config[curr_target]:[], $[ "KEY":"IncomingUser", "VALUE":row ]);
-   });
-   string out = getOutgoingValues();
-   if (size(out)>0) IscsiServer::config[curr_target] =
-				add(IscsiServer::config[curr_target]:[], $[ "KEY":"OutgoingUser", "VALUE":out ]);
-
-
+ IscsiServerFunctions::setTargetAuth( curr_target, getIncomingValues(), getOutgoingValues() );
  } else{
-   IscsiServer::config["auth"] = [];
-   foreach(string row,  getIncomingValues(), {
-    IscsiServer::config["auth"] = add(IscsiServer::config["auth"]:[], $[ "KEY":"IncomingUser", "VALUE":row ]);
-   });
-  string out = getOutgoingValues();
-  if (size(out)>0) IscsiServer::config["auth"] = add(IscsiServer::config["auth"]:[], $[ "KEY":"OutgoingUser", "VALUE":out ]);
+	IscsiServerFunctions::setAuth( getIncomingValues(), getOutgoingValues() );
  }
 }
 
@@ -212,23 +174,14 @@ void initAddTarget(string key){
 
  UI::ChangeWidget(`id(`target), `Value, target);
  UI::ChangeWidget(`id(`identifier), `Value, uuid);
- UI::ChangeWidget(`id(`lun), `Value, tostring( IscsiServer::getHighestLun() + 1));
+ UI::ChangeWidget(`id(`lun), `Value, tostring(IscsiServerFunctions::getNextLun()) );
 }
 
 void storeAddTarget(string option_id, map option_map){
  list<map<string, any> > old = [];
- string target = tostring( sformat("%1:%2",UI::QueryWidget(`id(`target), `Value), UI::QueryWidget(`id(`identifier), `Value))    );
+ string target = tostring( sformat("%1:%2",UI::QueryWidget(`id(`target), `Value), UI::QueryWidget(`id(`identifier), `Value)) );
  string lun = sformat("%1 Path=%2,Type=fileio",UI::QueryWidget(`id(`lun), `Value), UI::QueryWidget(`id(`path), `Value) );
- if(size(IscsiServer::config[target]:[])>0){
-  foreach(map<string, any> row, IscsiServer::config[target]:[], {
-   if ( (row["KEY"]:""!="Target")&&(row["KEY"]:""!="Lun") ) old = add(old, row);
-  });
- }
-  IscsiServer::config[target] = flatten([
-				[
-                                 $[ "KEY":"Target", "VALUE":target ],
-                                 $[ "KEY":"Lun", "VALUE":lun ]
-                                ], old ]);
+ IscsiServerFunctions::addTarget(target, lun);
  curr_target = target;
 }
 
@@ -237,12 +190,12 @@ boolean validateAddTarget(string key, map event){
  string lun = tostring(    UI::QueryWidget(`id(`lun), `Value)       );
  string type = "no";
  if (( size(target)==0 && (Popup::Error(_("The target cannot be empty."))==nil) ) ||
-        ( if_exists("Target", target) && (Popup::Error(_("The target already exists."))==nil) )){
+        ( IscsiServerFunctions::ifExists("Target", target) && (Popup::Error(_("The target already exists."))==nil) )){
   UI::SetFocus(`id(`target));
   return false;
  }
  if ((size(lun)==0 && (Popup::Error(_("The logical unit definition cannot be empty."))==nil))||
-        ( if_exists("Lun", lun) && (Popup::Error(_("The logical unit already exists."))==nil))){
+        ( IscsiServerFunctions::ifExists("Lun", lun) && (Popup::Error(_("The logical unit already exists."))==nil))){
   UI::SetFocus(`id(`lun));
   return false;
  }
@@ -332,7 +285,7 @@ symbol handleAuth(string key, map event){
 
 //	**************** Edit Dialog	*****************************
 void initModify (string key) ``{
- foreach( map<string, any> row, (list<map<string, any> >) IscsiServer::config[curr_target]:[], {
+ foreach( map<string, any> row, (list<map<string, any> >) IscsiServerFunctions::getConfig()[curr_target]:[], {
   switch(row["KEY"]:""){
    case("Target")       :
 		UI::ChangeWidget( `id(`target),`Value, (splitstring(row["VALUE"]:"", ":"))[0]:"");
