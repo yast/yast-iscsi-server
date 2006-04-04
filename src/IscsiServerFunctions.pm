@@ -12,24 +12,18 @@ our %TYPEINFO;
 
 my %config = ();
 my %config_file = ();
+my %changes = ();
 
+#BEGIN { $TYPEINFO{getConfigFile} = ["function", ["map", "string", "any"] ]; }
+#sub getConfigFile {
+#    my $self = shift;
+#    return \%config_file;
+#}
 
-
-BEGIN { $TYPEINFO{setConfigFile} = ["function", "void", ["map", "string", "any"] ]; }
-sub setConfigFile {
-    my $self = shift;
-    %config_file = %{+shift};
-}
-
-BEGIN { $TYPEINFO{getConfigFile} = ["function", ["map", "string", "any"] ]; }
-sub getConfigFile {
-    my $self = shift;
-    return \%config_file;
-}
-
-BEGIN { $TYPEINFO{parseConfig} = ["function", ["map", "string", "any"] ]; }
+BEGIN { $TYPEINFO{parseConfig} = ["function", ["map", "string", "any"], ["map", "string", "any"] ]; }
 sub parseConfig {
     my $self = shift;
+    %config_file = %{+shift};
     my $values =  $config_file{'value'};
 
     my $scope="auth";
@@ -48,8 +42,8 @@ sub parseConfig {
     return \%config;
 }
 
-BEGIN { $TYPEINFO{removeConfig} = ["function", ["map", "string", "any"], "string" ]; }
-sub removeConfig {
+BEGIN { $TYPEINFO{removeItem} = ["function", ["map", "string", "any"], "string" ]; }
+sub removeItem {
     my $self = shift;
     my $key = shift;
     %config = %{$self->removeKeyFromMap(\%config, $key)};
@@ -62,13 +56,13 @@ sub getConfig {
     return \%config;
 }
 
-BEGIN { $TYPEINFO{setConfig} = ["function", "void", ["map", "string", "any"] ]; }
-sub setConfig {
-    my $self = shift;
-    %config = %{+shift};
-}
+#BEGIN { $TYPEINFO{setConfig} = ["function", "void", ["map", "string", "any"] ]; }
+#sub setConfig {
+#    my $self = shift;
+#    %config = %{+shift};
+#}
 
-BEGIN { $TYPEINFO{removeKeyFromMap} = ["function", ["map", "string", "any"], ["map", "string", "any"], "string"] ; }
+#BEGIN { $TYPEINFO{removeKeyFromMap} = ["function", ["map", "string", "any"], ["map", "string", "any"], "string"] ; }
 sub removeKeyFromMap {
  my $self = shift;
  my %tmp_map = %{+shift};
@@ -78,12 +72,12 @@ sub removeKeyFromMap {
  return \%tmp_map;
 }
 
-BEGIN { $TYPEINFO{removeKey} = ["function", ["map", "string", "any"], "string"] ; }
-sub removeKey {
+BEGIN { $TYPEINFO{getTargets} = ["function", ["map", "string", "any"] ] ; }
+sub getTargets {
  my $self = shift;
- my $key = shift;
+# my $key = ''shift;
 
- return $self->removeKeyFromMap(\%config, $key);
+ return $self->removeKeyFromMap(\%config, 'auth');
 }
 
 BEGIN { $TYPEINFO{getKeys} = ["function", ["list", "string"], ["map", "string", "any"] ] ; }
@@ -97,27 +91,6 @@ sub getKeys {
 }
 
 
-BEGIN { $TYPEINFO{hashConfig} = ["function", ["map", "string", "any"] ]; }
-sub hashConfig {
-    my $self = shift;
-    my $values =  $config_file{'value'};
-    my %tmp_hash = ();
-
-    my $scope="auth";
-    foreach  my $row ( @$values ){
-     if ($$row{'name'} eq 'Target'){
-      $scope = $$row{'value'};
-      $tmp_hash{$scope} =  [ $row ];
-     } else {
-	    if (!ref($tmp_hash{$scope})) {
-	     $tmp_hash{$scope} = [ $row ];
-	    } else {
-		    push(@{$tmp_hash{$scope}}, ($row));
-	 	   }
-	   }
-    };
-    return \%tmp_hash;
-}
 
 BEGIN { $TYPEINFO{setAuth} = ["function", "void", ["list", "string"], "string" ]; }
 sub setAuth {
@@ -200,37 +173,91 @@ sub getNextLun {
  return $lun+1;
 }
 
-BEGIN { $TYPEINFO{createMap} = [ "function", ["map", "string", "any"], ["map", "string", "any"], ["list", "string"] ] ; }
+#BEGIN { $TYPEINFO{createMap} = [ "function", ["map", "string", "any"], ["map", "string", "any"], ["list", "string"] ] ; }
 sub createMap {
- my $self = shift;
- my %old_map = %{+shift}; 
- my @comment = @{+shift}; 
+ my ($old_map, $comment) = @_;
+# my $self = shift;
+# my %old_map = %{+shift}; 
+# my @comment = @{+shift}; 
 
  my %tmp_map = (
-		"name"=>$old_map{"KEY"},
-           "value"=>$old_map{"VALUE"},
+		"name"=>$old_map->{"KEY"},
+           "value"=>$old_map->{"VALUE"},
            "kind"=>"value",
            "type"=>1,
-           "comment"=> \@comment 
+           "comment"=> $comment 
 		);
  return \%tmp_map;
 }
 
-BEGIN { $TYPEINFO{addTo} = [ "function", ["map", "string", "any"], ["map", "string", "any"], "string" ] ; }
+#BEGIN { $TYPEINFO{addTo} = [ "function", ["map", "string", "any"], ["map", "string", "any"], "string" ] ; }
 sub addTo {
- my $self = shift;
- my %old_map = %{+shift};
- my $target = shift;
-
+# my $self = shift;
+# my %old_map = %{+shift};
+# my $target = shift;
+ my ($old_map, $target) = @_;
  my @tmp_list = ();
 
-open(FILE, ">>/tmp/perl.log");
-print FILE Dumper($config{$target});
-close(FILE);
- return \%old_map;
+ foreach my $row (@{$config{$target}}){
+  push(@tmp_list, createMap( $row, [] ));
+ }
+ $old_map->{$target}=\@tmp_list;
+ return $old_map;
 }
 
+BEGIN { $TYPEINFO{writeConfig} = ["function", ["map", "string", "any"] ]; }
+sub writeConfig {
+    my $self = shift;
+    my $values =  $config_file{'value'};
+    my %new_config = ();
 
+    my $scope="auth";
+    foreach  my $row ( @$values ){
+     if ($$row{'name'} eq 'Target'){
+      $scope = $$row{'value'};
+      $new_config{$scope} =  [ $row ];
+     } else {
+	    if (!ref($new_config{$scope})) {
+	     $new_config{$scope} = [ $row ];
+	    } else {
+		    push(@{$new_config{$scope}}, ($row));
+	 	   }
+	   }
+    };
+
+    foreach my $key (keys %new_config){
+     if (! defined $config{$key}){
+      delete($new_config{$key});
+      push(@{$changes{'del'}}, $key);
+     }
+    }
+
+open(FILE, ">>/tmp/perl.log");
+    foreach my $key (keys %config){
+     if (! defined $new_config{$key}){
+      addTo(\%new_config, $key);
+      push(@{$changes{'add'}}, $key);
+     } else {
+	 my %comments = ();
+	 foreach my $row (@{$new_config{$key}}){
+	  push(@{$comments{$row->{'name'}}}, $row->{'comment'} )  if ($row->{'comment'} ne '');
+	 }
+	 my @new = ();
+	 foreach my $row (@{$config{$key}}){
+	  my $k = $row->{'KEY'};
+	 push(@new, createMap($row, $comments{$k}));
+	 delete($comments{$k});
+	 }
+	 $new_config{$key} = \@new;
+	}
+    }
+
+print FILE Dumper(\%new_config);
+#print FILE Dumper(\%changes);
+
+close(FILE);
+    return \%new_config;
+}
 
 
 

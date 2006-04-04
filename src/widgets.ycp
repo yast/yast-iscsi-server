@@ -77,8 +77,8 @@ list <string> getDialogValues(string user, string pass){
 void initTable (string key) ``{
     integer count = 0;
     list <term> inc_items = [];
- if (size(IscsiServerFunctions::removeKey("auth"))>0){
-    foreach(string key, any value, IscsiServerFunctions::removeKey("auth"), {
+ if (size(IscsiServerFunctions::getTargets())>0){
+    foreach(string key, any value, IscsiServerFunctions::getTargets(), {
      inc_items = add(inc_items, `item(`id(count), key));
      count = count + 1;
     });
@@ -96,7 +96,7 @@ symbol handleTable (string table, map event){
   case(`del)        :
                 if (Popup::ContinueCancel(_("Really delete this item?"))){
                  integer del=tointeger( UI::QueryWidget(`id(`server), `CurrentItem) );
-                 IscsiServerFunctions::removeConfig( ((term)UI::QueryWidget(`id(`server), `Item(del)))[1]:"" );
+                 IscsiServerFunctions::removeItem( ((term)UI::QueryWidget(`id(`server), `Item(del)))[1]:"" );
 		 initTable("");
                 }
                 break;

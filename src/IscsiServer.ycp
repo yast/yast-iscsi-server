@@ -26,8 +26,6 @@ import "SuSEFirewall";
 import "Confirm";
 import "IscsiServerFunctions";
 
-map <string, any> config_file = $[];
-global map<string, any> config = $[];
 boolean serviceStatus = false;
 
 /**
@@ -91,8 +89,9 @@ global boolean Modified() {
 //   boolean additional_parameter = true;
 
 boolean readConfig(){
- IscsiServerFunctions::setConfigFile( (map<string, any>)SCR::Read(.etc.ietd.all) );
- config = IscsiServerFunctions::parseConfig();
+ IscsiServerFunctions::parseConfig( (map<string, any>)SCR::Read(.etc.ietd.all) );
+//y2internal("%1", (map<string, any>)SCR::Read(.etc.ietd.all));
+// config = IscsiServerFunctions::parseConfig();
  return true;
 }
 
@@ -162,7 +161,9 @@ map<string, any> addToConfig( map<string, any> m_config_file, string key){
 
 boolean writeConfig(){
  string c_scope = "auth";
- map<string, any> m_config_file = IscsiServerFunctions::hashConfig();
+map <string, any> config_file = $[];
+map<string, any> config = $[];
+ map<string, any> m_config_file = IscsiServerFunctions::writeConfig();
 
 /*
  foreach(map<string, any> row, (IscsiServerFunctions::getConfigFile())["value"]:[], {
@@ -177,46 +178,54 @@ boolean writeConfig(){
 */
 
 y2internal("write - %1", m_config_file);
+/*
  foreach(string old_key, IscsiServerFunctions::getKeys(config), {
   if(size(config[old_key]:[])==0) IscsiServerFunctions::setConfig(IscsiServerFunctions::removeKey(old_key));
  });
- foreach(string old_key, IscsiServerFunctions::getKeys(config), {
+*/
+ foreach(string old_key, IscsiServerFunctions::getKeys(IscsiServerFunctions::getConfig()), {
   if(!( contains(IscsiServerFunctions::getKeys(m_config_file), old_key) )){
-   m_config_file = IscsiServerFunctions::addTo( m_config_file, old_key );
+//   m_config_file = IscsiServerFunctions::addTo( m_config_file, old_key );
   } else {
-
+/*
      map<string, any> comments = $[];
      foreach(map<string, any> old_list, m_config_file[old_key]:[], {
       string key = old_list["name"]:"";
       comments[key] = add(comments[key]:[], old_list["comment"]:"");
       });
+
      list<map<string, any> > new = [];
      foreach(map<string, any> old_map, config[old_key]:[], {
       string key = old_map["KEY"]:"";
-y2internal("%1", comments[key]:nil);
       if (size(comments[key]:[])>0){
-      new = add(new,
-		IscsiServerFunctions::createMap(old_map, comments[key]:[]));
+      new = add(new, IscsiServerFunctions::createMap(old_map, comments[key]:[]));
       comments = IscsiServerFunctions::removeKeyFromMap(comments,key);
        } else new = add(new,
 			IscsiServerFunctions::createMap(old_map, comments[key]:[]));
       });
-y2internal("%1", new);
 	m_config_file[old_key] = new;
+*/
     }
  });
-
+/*
  foreach(string old_key, IscsiServerFunctions::getKeys(m_config_file), {
   if(!( contains(IscsiServerFunctions::getKeys(config), old_key) )){
    m_config_file = IscsiServerFunctions::removeKeyFromMap(m_config_file, old_key);
   }
  });
 
+
+
+		////          above done !
+
+
  config_file["value"] = m_config_file["auth"]:[];
 
  foreach(string key, any val, IscsiServerFunctions::removeKeyFromMap(m_config_file, "auth"), {
   config_file["value"] = flatten([ config_file["value"]:[], (list<map<string, any> >)val ]);
  });
+*/
+
 //SCR::Write(.etc.ietd.all, config_file);
 //SCR::Write(.etc.ietd, nil);
 
