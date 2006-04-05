@@ -20,5 +20,5 @@ Icon=yast-iscsi-server
 Exec=/sbin/yast2 iscsi-server 
 
 Name=iSCSI Target
-GenericName=iscsi-target
+GenericName=Configure an iSCSI target
 X-KDE-SubstituteUID=true
