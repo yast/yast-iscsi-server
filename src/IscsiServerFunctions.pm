@@ -14,12 +14,6 @@ my %config = ();
 my %config_file = ();
 my %changes = ();
 
-#BEGIN { $TYPEINFO{getConfigFile} = ["function", ["map", "string", "any"] ]; }
-#sub getConfigFile {
-#    my $self = shift;
-#    return \%config_file;
-#}
-
 BEGIN { $TYPEINFO{parseConfig} = ["function", ["map", "string", "any"], ["map", "string", "any"] ]; }
 sub parseConfig {
     my $self = shift;
@@ -56,39 +50,31 @@ sub getConfig {
     return \%config;
 }
 
-#BEGIN { $TYPEINFO{setConfig} = ["function", "void", ["map", "string", "any"] ]; }
-#sub setConfig {
-#    my $self = shift;
-#    %config = %{+shift};
-#}
-
-#BEGIN { $TYPEINFO{removeKeyFromMap} = ["function", ["map", "string", "any"], ["map", "string", "any"], "string"] ; }
 sub removeKeyFromMap {
  my $self = shift;
  my %tmp_map = %{+shift};
  my $key = shift;
 
- delete $tmp_map{$key};
+ delete $tmp_map{$key} if defined $tmp_map{$key};
  return \%tmp_map;
 }
 
 BEGIN { $TYPEINFO{getTargets} = ["function", ["map", "string", "any"] ] ; }
 sub getTargets {
  my $self = shift;
-# my $key = ''shift;
 
  return $self->removeKeyFromMap(\%config, 'auth');
 }
 
-BEGIN { $TYPEINFO{getKeys} = ["function", ["list", "string"], ["map", "string", "any"] ] ; }
-sub getKeys {
- my $self = shift;
- my %tmp_map = %{+shift};
-
- my @keylist = keys(%tmp_map);
-
- return \@keylist;
-}
+#BEGIN { $TYPEINFO{getKeys} = ["function", ["list", "string"], ["map", "string", "any"] ] ; }
+#sub getKeys {
+# my $self = shift;
+# my %tmp_map = %{+shift};
+#
+# my @keylist = keys(%tmp_map);
+#
+# return \@keylist;
+#}
 
 
 
@@ -173,13 +159,11 @@ sub getNextLun {
  return $lun+1;
 }
 
-#BEGIN { $TYPEINFO{createMap} = [ "function", ["map", "string", "any"], ["map", "string", "any"], ["list", "string"] ] ; }
 sub createMap {
  my ($old_map, $comment) = @_;
-# my $self = shift;
-# my %old_map = %{+shift}; 
-# my @comment = @{+shift}; 
 
+open(FILE, ">>/tmp/perl.log");
+ $comment='' if (ref($comment) eq 'ARRAY');
  my %tmp_map = (
 		"name"=>$old_map->{"KEY"},
            "value"=>$old_map->{"VALUE"},
@@ -187,14 +171,12 @@ sub createMap {
            "type"=>1,
            "comment"=> $comment 
 		);
+print FILE Dumper(ref $comment);
+close(FILE);
  return \%tmp_map;
 }
 
-#BEGIN { $TYPEINFO{addTo} = [ "function", ["map", "string", "any"], ["map", "string", "any"], "string" ] ; }
 sub addTo {
-# my $self = shift;
-# my %old_map = %{+shift};
-# my $target = shift;
  my ($old_map, $target) = @_;
  my @tmp_list = ();
 
@@ -232,7 +214,6 @@ sub writeConfig {
      }
     }
 
-open(FILE, ">>/tmp/perl.log");
     foreach my $key (keys %config){
      if (! defined $new_config{$key}){
       addTo(\%new_config, $key);
@@ -240,23 +221,30 @@ open(FILE, ">>/tmp/perl.log");
      } else {
 	 my %comments = ();
 	 foreach my $row (@{$new_config{$key}}){
-	  push(@{$comments{$row->{'name'}}}, $row->{'comment'} )  if ($row->{'comment'} ne '');
+	  $comments{$row->{'name'}} = $row->{'comment'} if ($row->{'comment'} ne '');
+	  $comments{$row->{'name'}}='' if (not defined $comments{$row->{'name'}});
 	 }
 	 my @new = ();
 	 foreach my $row (@{$config{$key}}){
 	  my $k = $row->{'KEY'};
+	  $comments{$k}='' if not defined $comments{$k};
 	 push(@new, createMap($row, $comments{$k}));
-	 delete($comments{$k});
+	 $comments{$k}='';
 	 }
 	 $new_config{$key} = \@new;
 	}
     }
+    $config_file{'value'} = $new_config{'auth'};
+      delete ($new_config{'auth'});
 
-print FILE Dumper(\%new_config);
-#print FILE Dumper(\%changes);
-
-close(FILE);
-    return \%new_config;
+    foreach my $key (reverse(keys %new_config )){
+     if (not ref($new_config{$key})){
+      push(@{$config_file{'value'}}, $new_config{$key}) ;
+     } else {
+	     push(@{$config_file{'value'}}, @{$new_config{$key}}) ;
+	    }
+    }
+    return \%config_file;
 }
 
 
