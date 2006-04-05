@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr  5 17:50:29 CEST 2006 - mzugec@suse.cz
+
+- fixed #157648 - when modify target, can edit LUN 
+
+-------------------------------------------------------------------
 Wed Apr  5 17:16:42 CEST 2006 - mzugec@suse.cz
 
 - fixed #163299 - Iscsi->iSCSI

@@ -298,7 +298,7 @@ void initModify (string key) ``{
    case("Lun")          :
 		list<string> lun = splitstring(row["VALUE"]:"", " ");
 		UI::ChangeWidget(`id(`lun), `Value, lun[0]:"");
-                UI::ChangeWidget(`id(`lun),`Enabled, false);
+//                UI::ChangeWidget(`id(`lun),`Enabled, false);
 		string full_path = (splitstring(lun[1]:"", ","))[0]:"";
 		UI::ChangeWidget(`id(`path), `Value, (splitstring(full_path, "="))[1]:"" );
                 break;
