@@ -122,7 +122,6 @@ list <term> getAuthItems(){
 
 //	**************** Global Dialog	*********************
 void initGlobalValues(list<map<string, any> > values){
-y2internal("values %1", values);
   setAuthIn(false);
   setAuthOut(false);
    string user = "";
@@ -152,13 +151,18 @@ void initGlobal (string key){
 }
 
 void storeGlobal(string option_id, map option_map){
- if (size(curr_target)>0){
- IscsiServerFunctions::setTargetAuth( curr_target, getIncomingValues(), getOutgoingValues() );
- } else{
-	IscsiServerFunctions::setAuth( getIncomingValues(), getOutgoingValues() );
- }
+   if (size(curr_target)>0){
+    IscsiServerFunctions::setTargetAuth( curr_target, getIncomingValues(), getOutgoingValues() );
+   } else{
+  	IscsiServerFunctions::setAuth( getIncomingValues(), getOutgoingValues() );
+   }
 }
-
+boolean validateGlobal(string key, map event){
+ boolean ret=false;
+ if (!contains(getIncomingValues(), getOutgoingValues())) ret=true;
+ 	else Popup::Error(_("Cannot use same secret for incoming and outgoing authentication."));
+ return ret;
+}
 //	************** Add Target Dialog	******************
 void initAddTarget(string key){
  string target = "iqn";
@@ -232,20 +236,17 @@ symbol handleAuth(string key, map event){
 		string user = values[0]:"";
 		string pass = values[1]:"";
 		 integer count = size((list)UI::QueryWidget(`id (`incoming_table),`Items));
-
-
+		 
 		inc_auth[size(inc_auth)]= $["USER":user, "PASS":pass];
 		 UI::ChangeWidget (`id (`incoming_table), `Items, getAuthItems());
-
-//			add((list)UI::QueryWidget(`id (`incoming_table),`Items), `item(`id(count), user, pass)));
 		}
 
 		break;
   case(`edit)	:
 		integer curr = tointeger( UI::QueryWidget(`id (`incoming_table),`CurrentItem) );
 		if (curr!=nil){
-		 string user = inc_auth[curr, "USER"]:"";  //((term)UI::QueryWidget(`id(`incoming_table), `Item(curr)))[1]:"" ;
-		 string pass = inc_auth[curr, "PASS"]:"";//((term)UI::QueryWidget(`id(`incoming_table), `Item(curr)))[2]:"" ;
+		 string user = inc_auth[curr, "USER"]:"";
+		 string pass = inc_auth[curr, "PASS"]:"";
 		 list<string> values = getDialogValues(user, pass);
 
                  if (size(values)==2 ){

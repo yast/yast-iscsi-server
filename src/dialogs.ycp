@@ -140,8 +140,8 @@ map<string, map <string, any> > widgets = $[
         "init"   : initGlobal,
         "handle" : handleAuth,
         "store"  : storeGlobal,
-//        "validate_type" : `function,
-//        "validate_function" : validateGlobal,
+        "validate_type" : `function,
+        "validate_function" : validateGlobal,
 //        "label"  : _("Settings of SLP server"),
         "help" : HELPS["global_config"]:""
         ],
@@ -215,8 +215,8 @@ map<string, map <string, any> > widgets = $[
         "init"   : initGlobal,
         "handle" : handleAuth,
         "store"  : storeGlobal,
-//        "validate_type" : `function,
-//        "validate_function" : validateGlobal,
+        "validate_type" : `function,
+        "validate_function" : validateGlobal,
         "help" : HELPS["global_config"]:""
         ],
      "target-modify" : $[

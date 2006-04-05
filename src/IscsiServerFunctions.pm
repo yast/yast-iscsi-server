@@ -66,18 +66,6 @@ sub getTargets {
  return $self->removeKeyFromMap(\%config, 'auth');
 }
 
-#BEGIN { $TYPEINFO{getKeys} = ["function", ["list", "string"], ["map", "string", "any"] ] ; }
-#sub getKeys {
-# my $self = shift;
-# my %tmp_map = %{+shift};
-#
-# my @keylist = keys(%tmp_map);
-#
-# return \@keylist;
-#}
-
-
-
 BEGIN { $TYPEINFO{setAuth} = ["function", "void", ["list", "string"], "string" ]; }
 sub setAuth {
     my $self = shift;
@@ -88,8 +76,13 @@ sub setAuth {
 	foreach my $row (@incoming){
 	 push(@tmp_auth, {'KEY'=>'IncomingUser', 'VALUE'=>$row});
 	}
- push(@tmp_auth, {'KEY'=>'OutgoingUser', 'VALUE'=>$outgoing}) if ($outgoing =~/[w]+/);
+
+open(FILE, ">>/tmp/perl.log");
+print FILE Dumper($outgoing);
+ push(@tmp_auth, {'KEY'=>'OutgoingUser', 'VALUE'=>$outgoing}) if ($outgoing =~/[\w]+/);
+print FILE Dumper(@tmp_auth);
  $config{'auth'}=\@tmp_auth;
+close(FILE);
 }
 
 BEGIN { $TYPEINFO{setTargetAuth} = ["function", "void", "string", ["list", "string"], "string" ]; }
