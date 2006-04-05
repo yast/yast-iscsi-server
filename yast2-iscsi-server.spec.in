@@ -26,7 +26,7 @@ Summary:	Configuration of iscsi-server
 @yncludedir@/iscsi-server/*
 @clientdir@/iscsi-server.ycp
 @clientdir@/iscsi-server_*.ycp
-@moduledir@/IscsiServer.*
+@moduledir@/IscsiServer*
 @desktopdir@/iscsi-server.desktop
 @scrconfdir@/ietd.scr
 %doc @docdir@
