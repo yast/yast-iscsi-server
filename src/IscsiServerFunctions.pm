@@ -162,7 +162,6 @@ sub getNextLun {
 sub createMap {
  my ($old_map, $comment) = @_;
 
-open(FILE, ">>/tmp/perl.log");
  $comment='' if (ref($comment) eq 'ARRAY');
  my %tmp_map = (
 		"name"=>$old_map->{"KEY"},
@@ -171,8 +170,6 @@ open(FILE, ">>/tmp/perl.log");
            "type"=>1,
            "comment"=> $comment 
 		);
-print FILE Dumper(ref $comment);
-close(FILE);
  return \%tmp_map;
 }
 
@@ -248,6 +245,10 @@ sub writeConfig {
 }
 
 
+BEGIN { $TYPEINFO{getChanges} = ["function", ["map", "string", "any"] ]; }
+sub getChanges {
+ return \%changes;
+}
 
 1;
 # EOF

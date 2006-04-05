@@ -98,14 +98,15 @@ boolean writeConfig(){
  map <string, any> config_file = IscsiServerFunctions::writeConfig();
  config_file["type"]=tointeger(config_file["type"]:"1");
  config_file["file"]=tointeger(config_file["file"]:"1");
-list <map<string, any> > value = [];
+ list <map<string, any> > value = [];
  foreach(map<string, any> row, config_file["value"]:[], {
   row["type"]=tointeger(row["type"]:"1");
   row["file"]=tointeger(row["file"]:"1");
   value = add(value, row);
  });
+
  config_file["value"] = value;
- y2internal("%1", config_file);
+ y2milestone("%1", config_file);
  SCR::Write(.etc.ietd.all, config_file);
  SCR::Write(.etc.ietd, nil);
  return true;

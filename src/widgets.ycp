@@ -12,9 +12,9 @@ void setAuthIn(boolean status){
  UI::ChangeWidget(`id(`incoming_table),`Enabled, status );
  UI::ChangeWidget(`id(`auth_in),`Value, status );
 
- UI::ChangeWidget(`id(`add),`Value, status );
- UI::ChangeWidget(`id(`edit),`Value, status );
- UI::ChangeWidget(`id(`delete),`Value, status );
+ UI::ChangeWidget(`id(`add),`Enabled, status );
+ UI::ChangeWidget(`id(`edit),`Enabled, status );
+ UI::ChangeWidget(`id(`delete),`Enabled, status );
 
  if(status) UI::ChangeWidget(`id(`auth_none),`Value, !status );
 }
