@@ -19,6 +19,6 @@ X-SuSE-YaST-AutoInstResource=iscsi-server
 Icon=yast-iscsi-server
 Exec=/sbin/yast2 iscsi-server 
 
-Name=Iscsi Target
+Name=iSCSI Target
 GenericName=iscsi-target
 X-KDE-SubstituteUID=true
