@@ -147,15 +147,15 @@ if (Popup::YesNo(_(
 "Restart the iscsitarget service?"
 ))) Service::Restart("iscsitarget");
  else {
-/*
 	 map<string, any> changes = IscsiServerFunctions::getChanges();
 	 y2internal("changes %1", changes);
 
 	 foreach(string row, changes["del"]:[], {
 	  y2internal("to delete %1", row);
-	  string  target=((map<string, any>)SCR::Execute(.target.bash_output, 
+	  string  target=((map<string, any>)SCR::Execute(.target.bash_output,
 		"cat /proc/net/iet/volume|grep $TARGET", $["TARGET":row]))["stdout"]:"" ;
 	  string to_delete = splitstring( splitstring(target, " ")[0]:"", ":")[1]:"";
+	  y2internal("to delete %1", to_delete);
 	  SCR::Execute(.target.bash_output, "ietadm --op delete --tid=$TID", $["TID":to_delete]);
 	 });
 
@@ -165,18 +165,28 @@ if (Popup::YesNo(_(
           string  target=((map<string, any>)SCR::Execute(.target.bash_output,
                 "cat /proc/net/iet/volume|grep $TARGET", $["TARGET":row]))["stdout"]:"" ;
           string to_add = splitstring( splitstring(target, " ")[0]:"", ":")[1]:"";
-	 y2internal("to add %1", to_add);
 	 list<string> lun = [];
+	 list <string> secret = [];
 	   foreach( map<string, any> conf_row, (list<map<string, any> >) IscsiServerFunctions::getConfig()[row]:[], {
-	    if (conf_row["KEY"]:""=="Lun") lun = splitstring(conf_row["VALUE"]:"", " ");
+	    switch (conf_row["KEY"]:""){
+		case("Lun") : lun = splitstring(conf_row["VALUE"]:"", " ");
+				break;
+		case("IncomingUser") :  secret = splitstring(conf_row["VALUE"]:"", " ");
+	y2internal("params %1 %2 %3", to_add, secret[0]:"", secret[1]:"");
+					SCR::Execute(.target.bash_output, "ietadm --op new --tid=$TID --user --params=IncomingUser=$US,Password=$PASS", $["TID":to_add, "US":secret[0]:"", "PASS":secret[1]:""]);
+				break;
+		case("OutgoingUser") :  secret = splitstring(conf_row["VALUE"]:"", " ");
+					SCR::Execute(.target.bash_output, "ietadm --op new --tid=$TID --user --params=OutgoingUser=$US,Password=$PASS", $["TID":to_add, "US":secret[0]:"", "PASS":secret[1]:""]);
+				break;
+	   }
 	   });
 	 string lun_num = lun[0]:"";
 	 string lun_path = splitstring(lun[1]:"", ",")[0]:"";
-	 SCR::Execute(.target.bash_output, "ietadm --op new --tid=$TID --lun=$LUN --params Path=$PATH", 
-		$["TID":to_add, "LUN":lun_num, "PATH":lun_path]);
+	string command = sformat("ietadm --op new --tid=%1 --lun=%2 --params %3", to_add, lun_num, lun_path);
+	y2internal("command: %1", command);
+	SCR::Execute(.target.bash_output, command, $[]);
 	 y2internal("lun %1,%2", lun_num, lun_path);
 	 });
-*/
       }
 
  return true;
