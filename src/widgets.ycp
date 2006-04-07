@@ -160,7 +160,7 @@ void storeGlobal(string option_id, map option_map){
 boolean validateGlobal(string key, map event){
  boolean ret=false;
  if (!contains(getIncomingValues(), getOutgoingValues())) ret=true;
- 	else Popup::Error(_("Cannot use same secret for incoming and outgoing authentication."));
+ 	else Popup::Error(_("Cannot use the same secret for incoming and outgoing authentication."));
  return ret;
 }
 //	************** Add Target Dialog	******************
@@ -169,6 +169,7 @@ void initAddTarget(string key){
  string date = ((map<string, any>)SCR::Execute(.target.bash_output, "date +%Y-%m"))["stdout"]:"";
  string domain = ((map<string, any>)SCR::Execute(.target.bash_output, "dnsdomainname"))["stdout"]:"";
  string uuid = ((map<string, any>)SCR::Execute(.target.bash_output, "uuidgen"))["stdout"]:"";
+ uuid = deletechars(uuid, "\n");
  if (size(domain)>0){
   domain = (splitstring(domain, "\n"))[0]:"";
   list<string> tmp_list=splitstring(domain, ".");

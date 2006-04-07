@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr  7 08:26:27 CEST 2006 - mzugec@suse.cz
+
+- fixed #163999 - iscsi target - identifier contains '\n' 
+
+-------------------------------------------------------------------
 Wed Apr  5 17:50:29 CEST 2006 - mzugec@suse.cz
 
 - fixed #157648 - when modify target, can edit LUN 

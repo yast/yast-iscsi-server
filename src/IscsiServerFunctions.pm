@@ -207,7 +207,7 @@ sub writeConfig {
     foreach my $key (keys %config){
      if (! defined $new_config{$key}){
       addTo(\%new_config, $key);
-      push(@{$changes{'add'}}, $key);
+      push(@{$changes{'add'}}, $key) if ($key ne 'auth');
      } else {
 	 my %comments = ();
 	 foreach my $row (@{$new_config{$key}}){
