@@ -238,8 +238,26 @@ sub writeConfig {
 }
 
 
+sub getConnected {
+ open(PROC, "< /proc/net/iet/session");
+ my $target="";
+ my @connected = ();
+ foreach $row (<PROC>){
+  $target=$1 if ( $row =~ /tid:[\d]+ name:([\S]+)/);
+  my $find = 0;
+
+   foreach $conn (@connected){
+    $find = 1 if ( $conn =~ $target);
+   }
+  push(@connected, $target) if (( $row =~ /sid:[\d]+/)&&(not $find));
+ }
+ close(PROC);
+return \@connected;
+}
+
 BEGIN { $TYPEINFO{getChanges} = ["function", ["map", "string", "any"] ]; }
 sub getChanges {
+#TODO - to 'add' and 'del' add all targets but not @connected from getConnected
  return \%changes;
 }
 
