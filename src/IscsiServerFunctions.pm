@@ -10,10 +10,16 @@ use YaPI;
 
 our %TYPEINFO;
 
+# map of auth and target values
 my %config = ();
+
+# map for ini-agent
 my %config_file = ();
+
+# for remember add and deleted targets
 my %changes = ();
 
+# read data given from ini-agent and put values into %config map
 BEGIN { $TYPEINFO{parseConfig} = ["function", ["map", "string", "any"], ["map", "string", "any"] ]; }
 sub parseConfig {
     my $self = shift;
@@ -36,6 +42,7 @@ sub parseConfig {
     return \%config;
 }
 
+# remove item with given key from %config and return result 
 BEGIN { $TYPEINFO{removeItem} = ["function", ["map", "string", "any"], "string" ]; }
 sub removeItem {
     my $self = shift;
@@ -44,12 +51,15 @@ sub removeItem {
     return \%config;
 }
 
+# accessor for %config
 BEGIN { $TYPEINFO{getConfig} = ["function", ["map", "string", "any"] ]; }
 sub getConfig {
     my $self = shift;
     return \%config;
 }
 
+# internal function :
+# return given map without given key
 sub removeKeyFromMap {
  my $self = shift;
  my %tmp_map = %{+shift};
@@ -59,6 +69,7 @@ sub removeKeyFromMap {
  return \%tmp_map;
 }
 
+# return targets (ommit 'auth' from %config)
 BEGIN { $TYPEINFO{getTargets} = ["function", ["map", "string", "any"] ] ; }
 sub getTargets {
  my $self = shift;
@@ -66,6 +77,7 @@ sub getTargets {
  return $self->removeKeyFromMap(\%config, 'auth');
 }
 
+# set discovery authentication
 BEGIN { $TYPEINFO{setAuth} = ["function", "void", ["list", "string"], "string" ]; }
 sub setAuth {
     my $self = shift;
@@ -77,14 +89,11 @@ sub setAuth {
 	 push(@tmp_auth, {'KEY'=>'IncomingUser', 'VALUE'=>$row});
 	}
 
-open(FILE, ">>/tmp/perl.log");
-print FILE Dumper($outgoing);
  push(@tmp_auth, {'KEY'=>'OutgoingUser', 'VALUE'=>$outgoing}) if ($outgoing =~/[\w]+/);
-print FILE Dumper(@tmp_auth);
  $config{'auth'}=\@tmp_auth;
-close(FILE);
 }
 
+# set authentication for given target
 BEGIN { $TYPEINFO{setTargetAuth} = ["function", "void", "string", ["list", "string"], "string" ]; }
 sub setTargetAuth {
     my $self = shift;
@@ -99,6 +108,7 @@ sub setTargetAuth {
  push(@$tmp_auth, {'KEY'=>'OutgoingUser', 'VALUE'=>$outgoing}) if ($outgoing =~/[\w]+/);
 }
 
+# create new target
 BEGIN { $TYPEINFO{addTarget} = ["function", "void", "string", "string" ] ; }
 sub addTarget {
  my $self = shift;
@@ -115,7 +125,7 @@ sub addTarget {
 }
 
 
-
+# check whether target/lun already exists
 BEGIN { $TYPEINFO{ifExists} = ["function", "boolean", "string", "string" ] ; }
 sub ifExists {
  my $self = shift;
@@ -136,6 +146,7 @@ sub ifExists {
  return $ret; 
 }
 
+# get highest lun +1
 BEGIN { $TYPEINFO{getNextLun} = [ "function", "integer" ] ; }
 sub getNextLun {
  my $self = shift;
@@ -152,6 +163,8 @@ sub getNextLun {
  return $lun+1;
 }
 
+# internal function
+# create map from given map in format needed by ini-agent
 sub createMap {
  my ($old_map, $comment) = @_;
 
@@ -166,6 +179,8 @@ sub createMap {
  return \%tmp_map;
 }
 
+# internal function
+# copy each row from $config{$target} to $old_map but in format needed by ini-agent
 sub addTo {
  my ($old_map, $target) = @_;
  my @tmp_list = ();
@@ -177,12 +192,14 @@ sub addTo {
  return $old_map;
 }
 
+# parse %config and write it to %config_file for ini-agent
 BEGIN { $TYPEINFO{writeConfig} = ["function", ["map", "string", "any"] ]; }
 sub writeConfig {
     my $self = shift;
     my $values =  $config_file{'value'};
     my %new_config = ();
 
+    # read old configuration and write it to %new_config
     my $scope="auth";
     foreach  my $row ( @$values ){
      if ($$row{'name'} eq 'Target'){
@@ -197,6 +214,7 @@ sub writeConfig {
 	   }
     };
 
+    # deleted items add to $changes{'del'}
     foreach my $key (keys %new_config){
      if (! defined $config{$key}){
       delete($new_config{$key});
@@ -206,9 +224,11 @@ sub writeConfig {
 
     foreach my $key (keys %config){
      if (! defined $new_config{$key}){
+      # add new items
       addTo(\%new_config, $key);
       push(@{$changes{'add'}}, $key) if ($key ne 'auth');
      } else {
+	 # for modifying store comments
 	 my %comments = ();
 	 foreach my $row (@{$new_config{$key}}){
 	  $comments{$row->{'name'}} = $row->{'comment'} if ($row->{'comment'} ne '');
@@ -218,15 +238,17 @@ sub writeConfig {
 	 foreach my $row (@{$config{$key}}){
 	  my $k = $row->{'KEY'};
 	  $comments{$k}='' if not defined $comments{$k};
+	 # and put it to new map with old comments
 	 push(@new, createMap($row, $comments{$k}));
 	 $comments{$k}='';
 	 }
 	 $new_config{$key} = \@new;
 	}
     }
+    # write 'auth' into %new_config
     $config_file{'value'} = $new_config{'auth'};
       delete ($new_config{'auth'});
-
+    #write all targets into %new_config
     foreach my $key (reverse(keys %new_config )){
      if (not ref($new_config{$key})){
       push(@{$config_file{'value'}}, $new_config{$key}) ;
@@ -237,7 +259,7 @@ sub writeConfig {
     return \%config_file;
 }
 
-
+# get now connected targets
 BEGIN { $TYPEINFO{getConnected} = ["function", ["list", "string"] ]; }
 sub getConnected {
  open(PROC, "< /proc/net/iet/session");
@@ -256,6 +278,7 @@ sub getConnected {
 return \@connected;
 }
 
+# accessor for %changes
 BEGIN { $TYPEINFO{getChanges} = ["function", ["map", "string", "any"] ]; }
 sub getChanges {
 #TODO - to 'add' and 'del' add all targets but not @connected from getConnected

@@ -88,13 +88,16 @@ global boolean Modified() {
 //    * Some additional parameter needed for the configuration.
 //   boolean additional_parameter = true;
 
+// read configuration file /etc/ietd.conf
 boolean readConfig(){
  IscsiServerFunctions::parseConfig( (map<string, any>)SCR::Read(.etc.ietd.all) );
  return true;
 }
 
 
+// write configuration file /etc/ietd.conf
 boolean writeConfig(){
+ // prepare map, because perl->ycp lost information about data types (integers in this case)
  map <string, any> config_file = IscsiServerFunctions::writeConfig();
  config_file["type"]=tointeger(config_file["type"]:"1");
  config_file["file"]=tointeger(config_file["file"]:"1");
@@ -107,12 +110,13 @@ boolean writeConfig(){
 
  config_file["value"] = value;
  y2milestone("%1", config_file);
+ // write it
  SCR::Write(.etc.ietd.all, config_file);
  SCR::Write(.etc.ietd, nil);
  return true;
 }
 
-
+// test if required package ("iscsitarget") is installed
 boolean installed_packages(){
  boolean ret = false;
   if( !Package::InstallMsg( "iscsitarget",
@@ -125,6 +129,8 @@ boolean installed_packages(){
  return ret;
 }
 
+// check status of iscsitarget service
+// if not enabled, start it manually
 boolean getServiceStatus(){
  boolean ret = true;
  if (Service::Status("iscsitarget") == 0) serviceStatus=true;
@@ -133,13 +139,16 @@ y2internal("Service status = %1", serviceStatus);
  return ret;
 }
 
+// set service status
 boolean setServiceStatus(){
  boolean ret = true;
  if (!serviceStatus) Service::Stop("iscsitarget");
  return ret;
 }
 
+// #157643 - reload server
 boolean reloadServer(){
+// ask user whether reload or restart server
 if (Popup::YesNo(_(
 "If changes have been made, the iSCSI target is not able \n"
 "to reload current configuration. It can only restart.\n"
@@ -147,9 +156,10 @@ if (Popup::YesNo(_(
 "Restart the iscsitarget service?"
 ))) Service::Restart("iscsitarget");
  else {
+	// get changes from perl module
 	 map<string, any> changes = IscsiServerFunctions::getChanges();
 	 list<string> connected = IscsiServerFunctions::getConnected();
-
+	// plus add there all targets except with active sessions (it means delete and create as new each target)
          foreach(string key,any value, IscsiServerFunctions::getTargets(), {
 	 if ((!contains(connected, key))&&(!contains(changes["add"]:[], key))&&(!contains(changes["del"]:[], key))){
 	   changes["del"] = add (changes["del"]:[], key);
@@ -158,23 +168,30 @@ if (Popup::YesNo(_(
 	  }
          });
 
+	// delete targets
 	 foreach(string row, changes["del"]:[], {
 	  y2internal("to delete %1", row);
 	  string  target=((map<string, any>)SCR::Execute(.target.bash_output,
+		// get TID number for target
 		"cat /proc/net/iet/volume|grep $TARGET", $["TARGET":row]))["stdout"]:"" ;
 	  string to_delete = splitstring( splitstring(target, " ")[0]:"", ":")[1]:"";
 	  y2internal("to delete %1", to_delete);
+	// delete record with that TID
 	  SCR::Execute(.target.bash_output, "ietadm --op delete --tid=$TID", $["TID":to_delete]);
 	 });
 
+	// add a new target
 	 foreach(string row, changes["add"]:[], {
           y2internal("to add %1", row);
+	// create new target
 	 SCR::Execute(.target.bash_output, "ietadm --op new --tid=0 --params Name=$NAME", $["NAME":row]);
           string  target=((map<string, any>)SCR::Execute(.target.bash_output,
                 "cat /proc/net/iet/volume|grep $TARGET", $["TARGET":row]))["stdout"]:"" ;
+	// get TID of that target
           string to_add = splitstring( splitstring(target, " ")[0]:"", ":")[1]:"";
 	 list<string> lun = [];
 	 list <string> secret = [];
+	// add authentication to target
 	   foreach( map<string, any> conf_row, (list<map<string, any> >) IscsiServerFunctions::getConfig()[row]:[], {
 	    switch (conf_row["KEY"]:""){
 		case("Lun") : lun = splitstring(conf_row["VALUE"]:"", " ");
@@ -190,6 +207,7 @@ if (Popup::YesNo(_(
 	   });
 	 string lun_num = lun[0]:"";
 	 string lun_path = splitstring(lun[1]:"", ",")[0]:"";
+	// add LUN for target
 	string command = sformat("ietadm --op new --tid=%1 --lun=%2 --params %3", to_add, lun_num, lun_path);
 	y2internal("command: %1", command);
 	SCR::Execute(.target.bash_output, command, $[]);
@@ -238,24 +256,22 @@ global boolean Read() {
 	""
     );
 
-    // read database
+    // check if user is root
     if(!Confirm::MustBeRoot()) return false;
     Progress::NextStage();
-    /* Error message */
+    // check if required packages ("iscsitarget") are installed
     if(!installed_packages()) return false;
     sleep(sl);
 
-    // read another database
     if(Abort()) return false;
     Progress::NextStep();
-    /* Error message */
+    // get status of iscsitarget init script
     if(!getServiceStatus()) return false;
     sleep(sl);
 
-    // read current settings
     if(Abort()) return false;
     Progress::NextStage();
-    /* Error message */
+    // read configuration (/etc/ietd.conf)
     if(!readConfig()) {
 	 Report::Error(Message::CannotReadCurrentSettings());
 	 return false;
@@ -263,7 +279,6 @@ global boolean Read() {
     sleep(sl);
 
     // detect devices
-//    if(Abort()) return false;
         Progress::set(false);
         SuSEFirewall::Read();
         Progress::set(true);
@@ -289,7 +304,7 @@ global boolean Read() {
  */
 global boolean Write() {
 
-    /* IscsiServer read dialog caption */
+    /* IscsiServer write dialog caption */
     string caption = _("Saving iSCSI Target Configuration");
 
     // TODO FIXME And set the right number of stages
@@ -322,23 +337,21 @@ global boolean Write() {
         Progress::set(true);
 
     Progress::NextStage();
-    /* Error message */
+    // write configuration (/etc/ietd.conf)
     if(!writeConfig()) Report::Error (_("Cannot write settings."));
     sleep(sl);
 
 
-    // run SuSEconfig
     if(Abort()) return false;
     Progress::NextStage ();
-    /* Error message */
-    if(!reloadServer()) Report::Error (Message::SuSEConfigFailed());
+    //  ask user whether reload or restart server and do it
+    if(!reloadServer()) return false;
     sleep(sl);
 
     if(Abort()) return false;
-    /* Progress finished */
     Progress::NextStage();
     sleep(sl);
-
+    // set iscsitarget initscript status
     if(!setServiceStatus()) return false;
     return true;
 }
@@ -394,8 +407,9 @@ global map AutoPackages() {
     return $[ "install":[], "remove":[] ];
 }
 
-global boolean GetStartService() {
 
+// get/set service accessors for CWMService component
+global boolean GetStartService() {
  return Service::Enabled("iscsitarget");
 }
 

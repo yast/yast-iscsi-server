@@ -3,11 +3,12 @@
 textdomain "iscsi-server";
 import "IscsiServerFunctions";
 
-//	**************** global funcions and variables	*****
+//	**************** global funcions and variables *****
 string curr_target = "";
 string modify_record = "";
 map inc_auth = $[];
 
+// set incoming authentication enabled/disabled status
 void setAuthIn(boolean status){
  UI::ChangeWidget(`id(`incoming_table),`Enabled, status );
  UI::ChangeWidget(`id(`auth_in),`Value, status );
@@ -19,6 +20,7 @@ void setAuthIn(boolean status){
  if(status) UI::ChangeWidget(`id(`auth_none),`Value, !status );
 }
 
+// set outgoing authentication enabled/disabled status
 void setAuthOut(boolean status){
  UI::ChangeWidget(`id(`user_out),`Enabled, status );
  UI::ChangeWidget(`id(`pass_out),`Enabled, status );
@@ -26,6 +28,7 @@ void setAuthOut(boolean status){
  if(status) UI::ChangeWidget(`id(`auth_none),`Value, !status );
 }
 
+// get values for incoming authentication
 list<string> getIncomingValues(){
  list <string> values = [];
  if ((boolean)UI::QueryWidget(`id(`auth_in), `Value) == true){
@@ -38,12 +41,14 @@ list<string> getIncomingValues(){
  } else return [];
 }
 
+// get values for outgoing authentication
 string getOutgoingValues(){
  if ((boolean)UI::QueryWidget(`id(`auth_out), `Value) == true){
    return sformat("%1 %2", UI::QueryWidget(`id(`user_out), `Value), UI::QueryWidget(`id(`pass_out), `Value) );
  } else return "";
 }
 
+// dialog to add/modify user and password
 list <string> getDialogValues(string user, string pass){
  UI::OpenDialog( `VBox(
 		   `TextEntry(`id(`p_user),_("Username"), user),
@@ -73,16 +78,20 @@ list <string> getDialogValues(string user, string pass){
 }
 
 //	**************** Server Dialog	*********************
+// dialog with targets
 
+// initialize target dialog
 void initTable (string key) ``{
     integer count = 0;
     list <term> inc_items = [];
+ // create items from targets
  if (size(IscsiServerFunctions::getTargets())>0){
     foreach(string key, any value, IscsiServerFunctions::getTargets(), {
      inc_items = add(inc_items, `item(`id(count), key));
      count = count + 1;
     });
   }
+  // put it into table
   UI::ChangeWidget(`id(`server), `Items, inc_items);
 }
 
@@ -91,9 +100,11 @@ symbol handleTable (string table, map event){
  if(event["EventReason"]:"" == "Activated"){
  switch((symbol)event["ID"]:nil){
   case(`add)        :
+		// goto  AddDialog() (initAddTarget)
                 ret = `add;
                 break;
   case(`del)        :
+		// add a new item
                 if (Popup::ContinueCancel(_("Really delete this item?"))){
                  integer del=tointeger( UI::QueryWidget(`id(`server), `CurrentItem) );
                  IscsiServerFunctions::removeItem( ((term)UI::QueryWidget(`id(`server), `Item(del)))[1]:"" );
@@ -101,8 +112,10 @@ symbol handleTable (string table, map event){
                 }
                 break;
   case(`edit)	:
+		// edit new item
 		integer edit=tointeger( UI::QueryWidget(`id(`server), `CurrentItem) );
 		curr_target = ((term)UI::QueryWidget(`id(`server), `Item(edit)))[1]:"";
+		// goto EditDialog() (initModify)
 		ret = `edit;
 		break;
   }
@@ -110,6 +123,7 @@ symbol handleTable (string table, map event){
  return ret;
 }
 
+// create items for incoming table 
 list <term> getAuthItems(){
  list <term> inc_items = [];
  integer count = -1;
@@ -126,6 +140,7 @@ void initGlobalValues(list<map<string, any> > values){
   setAuthOut(false);
    string user = "";
    string pass = "";
+   // incoming authentication
    inc_auth = $[];
    integer count = 0;
    foreach(map<string,any> auth, values, {
@@ -145,26 +160,32 @@ void initGlobalValues(list<map<string, any> > values){
    UI::ChangeWidget(`id(`incoming_table), `Items, getAuthItems() );
 }
 
+// initialize discovery authentication or authentication for given target
 void initGlobal (string key){
  if (size(curr_target)>0) initGlobalValues(IscsiServerFunctions::getConfig()[curr_target]:[]);
 	else if (size(IscsiServerFunctions::getConfig()["auth"]:[])>0) initGlobalValues(IscsiServerFunctions::getConfig()["auth"]:[]);
 }
 
+// save discovery authentication or authentication for given target
 void storeGlobal(string option_id, map option_map){
    if (size(curr_target)>0){
     IscsiServerFunctions::setTargetAuth( curr_target, getIncomingValues(), getOutgoingValues() );
    } else{
-  	IscsiServerFunctions::setAuth( getIncomingValues(), getOutgoingValues() );
+	IscsiServerFunctions::setAuth( getIncomingValues(), getOutgoingValues() );
    }
 }
+
+// validate functions checks the secret for incoming and outgoing cannot be same
 boolean validateGlobal(string key, map event){
  boolean ret=false;
  if (!contains(getIncomingValues(), getOutgoingValues())) ret=true;
- 	else Popup::Error(_("Cannot use the same secret for incoming and outgoing authentication."));
+	else Popup::Error(_("Cannot use the same secret for incoming and outgoing authentication."));
  return ret;
 }
 //	************** Add Target Dialog	******************
+// initialize function for create new target
 void initAddTarget(string key){
+// some proposed values
  string target = "iqn";
  string date = ((map<string, any>)SCR::Execute(.target.bash_output, "date +%Y-%m"))["stdout"]:"";
  string domain = ((map<string, any>)SCR::Execute(.target.bash_output, "dnsdomainname"))["stdout"]:"";
@@ -182,14 +203,17 @@ void initAddTarget(string key){
  UI::ChangeWidget(`id(`lun), `Value, tostring(IscsiServerFunctions::getNextLun()) );
 }
 
+// save values
 void storeAddTarget(string option_id, map option_map){
  list<map<string, any> > old = [];
  string target = tostring( sformat("%1:%2",UI::QueryWidget(`id(`target), `Value), UI::QueryWidget(`id(`identifier), `Value)) );
  string lun = sformat("%1 Path=%2,Type=fileio",UI::QueryWidget(`id(`lun), `Value), UI::QueryWidget(`id(`path), `Value) );
+// add/modify that values
  IscsiServerFunctions::addTarget(target, lun);
  curr_target = target;
 }
 
+// validate function checks if target/lun are unique and not empty
 boolean validateAddTarget(string key, map event){
  string target = tostring( UI::QueryWidget(`id(`target), `Value)    );
  string lun = tostring(    UI::QueryWidget(`id(`lun), `Value)       );
@@ -208,10 +232,11 @@ boolean validateAddTarget(string key, map event){
 }
 
 //	**************** Target Auth	*******************
-
+// handle authentication dialog
 symbol handleAuth(string key, map event){
  if (event["EventReason"]:"" == "ValueChanged"){
  boolean status = false;
+// enable/disable none/incoming/outgoing authentication
  switch((symbol)event["ID"]:nil){
   case(`auth_none):
                 status = (boolean)UI::QueryWidget(`id(`auth_none), `Value);
@@ -228,6 +253,7 @@ symbol handleAuth(string key, map event){
                 break;
   }
  }
+// add/edit/delete incoming authentication
  if (event["EventReason"]:"" == "Activated"){
  switch((symbol)event["ID"]:nil){
   case(`add)	:
@@ -237,7 +263,7 @@ symbol handleAuth(string key, map event){
 		string user = values[0]:"";
 		string pass = values[1]:"";
 		 integer count = size((list)UI::QueryWidget(`id (`incoming_table),`Items));
-		 
+
 		inc_auth[size(inc_auth)]= $["USER":user, "PASS":pass];
 		 UI::ChangeWidget (`id (`incoming_table), `Items, getAuthItems());
 		}
@@ -286,6 +312,8 @@ symbol handleAuth(string key, map event){
 }
 
 //	**************** Edit Dialog	*****************************
+
+// init values for modifying target (read it from stored map)
 void initModify (string key) ``{
  foreach( map<string, any> row, (list<map<string, any> >) IscsiServerFunctions::getConfig()[curr_target]:[], {
   switch(row["KEY"]:""){
@@ -299,7 +327,6 @@ void initModify (string key) ``{
    case("Lun")          :
 		list<string> lun = splitstring(row["VALUE"]:"", " ");
 		UI::ChangeWidget(`id(`lun), `Value, lun[0]:"");
-//                UI::ChangeWidget(`id(`lun),`Enabled, false);
 		string full_path = (splitstring(lun[1]:"", ","))[0]:"";
 		UI::ChangeWidget(`id(`path), `Value, (splitstring(full_path, "="))[1]:"" );
                 break;

@@ -23,10 +23,11 @@ import "TablePopup";
 include "iscsi-server/helps.ycp";
 include "iscsi-server/widgets.ycp";
 
-
+// store current here
 string current_tab = "service";
 
 map tabs_descr = $[
+// first tab - service status and firewall
         "service":$[
          "header"       : _("Service"),
          "contents"     :
@@ -48,6 +49,7 @@ map tabs_descr = $[
                         ),
          "widget_names" : [ "auto_start_up", "firewall" ]
          ],
+// second tab - global authentication
         "global":$[
          "header"       : _("Global"),
          "contents"     :
@@ -67,6 +69,7 @@ map tabs_descr = $[
                         ),
          "widget_names" : [ "global_config" ]
          ],
+// third tab - targets / luns
         "targets":$[
          "header"       : _("Targets"),
          "contents"     :
@@ -95,22 +98,25 @@ map<string, map <string, any> > widgets = $[
             "auto_start_up" : CWMServiceStart::CreateAutoStartWidget ($[
                 "get_service_auto_start" : IscsiServer::GetStartService,
                 "set_service_auto_start" : IscsiServer::SetStartService,
-                // radio button (starting SLP service - option 1)
+                // radio button (starting iscsitarget service - option 1)
                 "start_auto_button" : _("When &Booting"),
-                // radio button (starting SLP service - option 2)
+                // radio button (starting iscsitarget service - option 2)
                 "start_manual_button" : _("&Manually"),
                 "help" : sformat (CWMServiceStart::AutoStartHelpTemplate (),
-                    // part of help text, used to describe radiobuttons (matching starting SLP service but without "&")
+                    // part of help text, used to describe radiobuttons (matching starting iscsitarget service but without "&")
                     _("When Booting"),
-                    // part of help text, used to describe radiobuttons (matching starting SLP service but without "&")
+                    // part of help text, used to describe radiobuttons (matching starting iscsitarget service but without "&")
                     _("Manually")
                 ),
             ]),
 
+	// firewall
 	"firewall" : CWMFirewallInterfaces::CreateOpenFirewallWidget ($[
 	        "services" : [ "iscsi-server" ],
 	        "display_details" : true,
 	      ]),
+
+	// discovery authentication dialog
      "global_config" : $[
         "widget" : `custom,
         "custom_widget" :
@@ -142,9 +148,10 @@ map<string, map <string, any> > widgets = $[
         "store"  : storeGlobal,
         "validate_type" : `function,
         "validate_function" : validateGlobal,
-//        "label"  : _("Settings of SLP server"),
         "help" : HELPS["global_config"]:""
         ],
+
+	// targets dialog
        "server_table" : $[
 		"widget" : `custom,
 		"custom_widget" :
@@ -165,6 +172,7 @@ map<string, map <string, any> > widgets = $[
 		"help" : HELPS["server_table"]:""
 	],
 
+	// dialog for add new target
      "target-add" : $[
         "widget" : `custom,
         "custom_widget" :
@@ -180,12 +188,13 @@ map<string, map <string, any> > widgets = $[
                  ),
 
         "init"   : initAddTarget,
-//        "handle" : handleAddTarget,
         "store"  : storeAddTarget,
         "validate_type" : `function,
         "validate_function" : validateAddTarget,
         "help" : HELPS["target-add"]:""
         ],
+
+	// dialog for add/edit authentication for target
      "target-auth" : $[
         "widget" : `custom,
         "custom_widget" :
@@ -219,6 +228,8 @@ map<string, map <string, any> > widgets = $[
         "validate_function" : validateGlobal,
         "help" : HELPS["global_config"]:""
         ],
+
+	// dialog for modifying target
      "target-modify" : $[
         "widget" : `custom,
         "custom_widget" :
@@ -233,10 +244,7 @@ map<string, map <string, any> > widgets = $[
                         )
                  ),
         "init"   : initModify,
-//        "handle" : handleAddTarget,
         "store"  : storeAddTarget,
-//        "validate_type" : `function,
-//        "validate_function" : validateAddTarget,
         "help" : HELPS["target-modify"]:""
         ]
 	];
@@ -248,6 +256,7 @@ map<string, map <string, any> > widgets = $[
  * Summary dialog
  * @return dialog result
  */
+// Main dialog - tabbed
 any SummaryDialog() {
     string caption = _("iSCSI Target Overview");
     curr_target = "";
@@ -261,7 +270,6 @@ any SummaryDialog() {
         ]),
     ];
     term contents = `VBox( "tab" );
-
     list<map <string, any> > w = CWM::CreateWidgets (["tab"], (map <string, map <string, any> >)widget_descr);
     string help = CWM::MergeHelps(w);
     contents = CWM::PrepareDialog(contents, w);
@@ -270,10 +278,10 @@ any SummaryDialog() {
     Wizard::HideBackButton();
 
     symbol ret = CWM::Run(w, $[`abort:ReallyAbort ]);
-
     return ret;
 }
 
+// dialog for add target
 any AddDialog(){
      current_tab = "targets";
     string caption = _("Add iSCSI Target");
@@ -303,9 +311,10 @@ any AddDialog(){
     return ret;
 }
 
+// discovery authentication dialog
 any AuthDialog(){
      current_tab = "targets";
-    string caption = _("Add iSCSI Target");
+    string caption = _("Modify iSCSI Target");
     list<map <string, any> > w = CWM::CreateWidgets (["target-auth"], (map <string, map <string, any> >)widgets);
         term contents =
                           `VBox(
@@ -332,6 +341,7 @@ any AuthDialog(){
     return ret;
 }
 
+// edit target dialog
 any EditDialog(){
      current_tab = "targets";
     string caption = _("Modify iSCSI Target");
