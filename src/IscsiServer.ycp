@@ -148,7 +148,15 @@ if (Popup::YesNo(_(
 ))) Service::Restart("iscsitarget");
  else {
 	 map<string, any> changes = IscsiServerFunctions::getChanges();
-	 y2internal("changes %1", changes);
+	 list<string> connected = IscsiServerFunctions::getConnected();
+
+         foreach(string key,any value, IscsiServerFunctions::getTargets(), {
+	 if ((!contains(connected, key))&&(!contains(changes["add"]:[], key))&&(!contains(changes["del"]:[], key))){
+	   changes["del"] = add (changes["del"]:[], key);
+	   changes["add"] = add (changes["add"]:[], key);
+           y2milestone("modified key %1", key);
+	  }
+         });
 
 	 foreach(string row, changes["del"]:[], {
 	  y2internal("to delete %1", row);

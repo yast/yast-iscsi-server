@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr 11 12:58:08 CEST 2006 - mzugec@suse.cz
+
+- fixed #157643 - reload server 
+
+-------------------------------------------------------------------
 Fri Apr  7 08:26:27 CEST 2006 - mzugec@suse.cz
 
 - fixed #163999 - iscsi target - identifier contains '\n' 

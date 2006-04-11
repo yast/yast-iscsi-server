@@ -238,15 +238,16 @@ sub writeConfig {
 }
 
 
+BEGIN { $TYPEINFO{getConnected} = ["function", ["list", "string"] ]; }
 sub getConnected {
  open(PROC, "< /proc/net/iet/session");
  my $target="";
  my @connected = ();
- foreach $row (<PROC>){
+ foreach my $row (<PROC>){
   $target=$1 if ( $row =~ /tid:[\d]+ name:([\S]+)/);
   my $find = 0;
 
-   foreach $conn (@connected){
+   foreach my $conn (@connected){
     $find = 1 if ( $conn =~ $target);
    }
   push(@connected, $target) if (( $row =~ /sid:[\d]+/)&&(not $find));
