@@ -166,7 +166,7 @@ void initGlobalValues(list<map<string, any> > values){
 // initialize discovery authentication or authentication for given target
 void initGlobal (string key){
  if (size(curr_target)>0) initGlobalValues(IscsiServerFunctions::getConfig()[curr_target]:[]);
-	else if (size(IscsiServerFunctions::getConfig()["auth"]:[])>0) initGlobalValues(IscsiServerFunctions::getConfig()["auth"]:[]);
+	else /*if (size(IscsiServerFunctions::getConfig()["auth"]:[])>0)*/ initGlobalValues(IscsiServerFunctions::getConfig()["auth"]:[]);
 }
 
 // save discovery authentication or authentication for given target

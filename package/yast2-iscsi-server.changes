@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Apr 24 11:13:41 CEST 2006 - mzugec@suse.cz
+
+- fixed #168732 - deleted values from auth are stored 
+
+-------------------------------------------------------------------
 Mon Apr 24 08:37:10 CEST 2006 - mzugec@suse.cz
 
 - comments, logs, testsuite 

@@ -111,7 +111,7 @@ boolean writeConfig(){
  });
 
  config_file["value"] = value;
- y2internal("config_file to write %1", config_file);
+ y2milestone("config_file to write %1", config_file);
  // write it
  SCR::Write(.etc.ietd.all, config_file);
  SCR::Write(.etc.ietd, nil);
@@ -137,7 +137,7 @@ boolean installed_packages(){
 boolean getServiceStatus(){
  boolean ret = true;
  if (Service::Status("iscsitarget") == 0) serviceStatus=true;
-y2internal("Service status = %1", serviceStatus);
+y2milestone("Service status = %1", serviceStatus);
  if (!serviceStatus) Service::Start("iscsitarget");
  return ret;
 }
@@ -180,7 +180,7 @@ if (Popup::YesNo(_(
 		// get TID number for target
 		"cat /proc/net/iet/volume|grep $TARGET", $["TARGET":row]))["stdout"]:"" ;
 	  string to_delete = splitstring( splitstring(target, " ")[0]:"", ":")[1]:"";
-	  y2internal("to delete %1", to_delete);
+	  y2milestone("to delete %1", to_delete);
 	// delete record with that TID
 	  SCR::Execute(.target.bash_output, "ietadm --op delete --tid=$TID", $["TID":to_delete]);
 	 });
@@ -194,7 +194,7 @@ if (Popup::YesNo(_(
                 "cat /proc/net/iet/volume|grep $TARGET", $["TARGET":row]))["stdout"]:"" ;
 	// get TID of that target
           string to_add = splitstring( splitstring(target, " ")[0]:"", ":")[1]:"";
-	  y2internal("to add %1", to_add);
+	  y2milestone("to add %1", to_add);
 	 list<string> lun = [];
 	 list <string> secret = [];
 	// add authentication to target
@@ -203,7 +203,7 @@ if (Popup::YesNo(_(
 		case("Lun") : lun = splitstring(conf_row["VALUE"]:"", " ");
 				break;
 		case("IncomingUser") :  secret = splitstring(conf_row["VALUE"]:"", " ");
-	y2internal("params %1 %2 %3", to_add, secret[0]:"", secret[1]:"");
+	y2milestone("params %1 %2 %3", to_add, secret[0]:"", secret[1]:"");
 					SCR::Execute(.target.bash_output, "ietadm --op new --tid=$TID --user --params=IncomingUser=$US,Password=$PASS", $["TID":to_add, "US":secret[0]:"", "PASS":secret[1]:""]);
 				break;
 		case("OutgoingUser") :  secret = splitstring(conf_row["VALUE"]:"", " ");
@@ -215,9 +215,9 @@ if (Popup::YesNo(_(
 	 string lun_path = splitstring(lun[1]:"", ",")[0]:"";
 	// add LUN for target
 	string command = sformat("ietadm --op new --tid=%1 --lun=%2 --params %3", to_add, lun_num, lun_path);
-	y2internal("command: %1", command);
+//	y2internal("command: %1", command);
 	SCR::Execute(.target.bash_output, command, $[]);
-	 y2internal("lun %1,%2", lun_num, lun_path);
+	 y2milestone("lun %1,%2", lun_num, lun_path);
 	 });
       }
  return true;
