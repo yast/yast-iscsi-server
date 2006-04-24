@@ -10,6 +10,7 @@ map inc_auth = $[];
 
 // set incoming authentication enabled/disabled status
 void setAuthIn(boolean status){
+ y2milestone("Status of AuthIncoming %1", status);
  UI::ChangeWidget(`id(`incoming_table),`Enabled, status );
  UI::ChangeWidget(`id(`auth_in),`Value, status );
 
@@ -22,6 +23,7 @@ void setAuthIn(boolean status){
 
 // set outgoing authentication enabled/disabled status
 void setAuthOut(boolean status){
+ y2milestone("Status of AuthOutgoing %1", status);
  UI::ChangeWidget(`id(`user_out),`Enabled, status );
  UI::ChangeWidget(`id(`pass_out),`Enabled, status );
  UI::ChangeWidget(`id(`auth_out),`Value, status );
@@ -44,7 +46,8 @@ list<string> getIncomingValues(){
 // get values for outgoing authentication
 string getOutgoingValues(){
  if ((boolean)UI::QueryWidget(`id(`auth_out), `Value) == true){
-   return sformat("%1 %2", UI::QueryWidget(`id(`user_out), `Value), UI::QueryWidget(`id(`pass_out), `Value) );
+   string values = sformat("%1 %2", UI::QueryWidget(`id(`user_out), `Value), UI::QueryWidget(`id(`pass_out), `Value) );
+   return values;
  } else return "";
 }
 
@@ -123,7 +126,7 @@ symbol handleTable (string table, map event){
  return ret;
 }
 
-// create items for incoming table 
+// create items for incoming table
 list <term> getAuthItems(){
  list <term> inc_items = [];
  integer count = -1;
@@ -197,7 +200,7 @@ void initAddTarget(string key){
   domain = sformat("%1.%2", tmp_list[1]:"", tmp_list[0]:"");
  } else domain="com.example";
  target = deletechars(sformat("%1.%2.%3", target, date, domain), "\n");
-
+ y2milestone("init values for add_target %1", target);
  UI::ChangeWidget(`id(`target), `Value, target);
  UI::ChangeWidget(`id(`identifier), `Value, uuid);
  UI::ChangeWidget(`id(`lun), `Value, tostring(IscsiServerFunctions::getNextLun()) );
@@ -209,6 +212,7 @@ void storeAddTarget(string option_id, map option_map){
  string target = tostring( sformat("%1:%2",UI::QueryWidget(`id(`target), `Value), UI::QueryWidget(`id(`identifier), `Value)) );
  string lun = sformat("%1 Path=%2,Type=fileio",UI::QueryWidget(`id(`lun), `Value), UI::QueryWidget(`id(`path), `Value) );
 // add/modify that values
+ y2milestone("Add target %1 with lun %2", target, lun);
  IscsiServerFunctions::addTarget(target, lun);
  curr_target = target;
 }
@@ -258,7 +262,7 @@ symbol handleAuth(string key, map event){
  switch((symbol)event["ID"]:nil){
   case(`add)	:
 		list<string> values = getDialogValues("", "");
-
+		y2milestone("Add authentication values");
 		if (size(values)==2 ){
 		string user = values[0]:"";
 		string pass = values[1]:"";
@@ -271,6 +275,7 @@ symbol handleAuth(string key, map event){
 		break;
   case(`edit)	:
 		integer curr = tointeger( UI::QueryWidget(`id (`incoming_table),`CurrentItem) );
+		y2milestone("Modify authentication values");
 		if (curr!=nil){
 		 string user = inc_auth[curr, "USER"]:"";
 		 string pass = inc_auth[curr, "PASS"]:"";
@@ -289,6 +294,7 @@ symbol handleAuth(string key, map event){
 		break;
   case(`delete)	:
 		any del = UI::QueryWidget(`id (`incoming_table),`CurrentItem);
+		y2milestone("Delete authentication value");
 		if (del != nil){
 		 if (Popup::ContinueCancel(_("Really delete the selected item?")))
 		  {
@@ -302,7 +308,7 @@ symbol handleAuth(string key, map event){
 			}
 			inc_auth = temp_map;
 		  UI::ChangeWidget(`id(`incoming_table), `Items, getAuthItems());
-		  }
+		  } else y2milestone("Delete canceled");
 		}
 		break;
   }

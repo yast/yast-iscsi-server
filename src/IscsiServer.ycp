@@ -89,8 +89,10 @@ global boolean Modified() {
 //   boolean additional_parameter = true;
 
 // read configuration file /etc/ietd.conf
-boolean readConfig(){
- IscsiServerFunctions::parseConfig( (map<string, any>)SCR::Read(.etc.ietd.all) );
+global boolean readConfig(){
+ map<string, any> read_values =  (map<string, any>)SCR::Read(.etc.ietd.all);
+ y2milestone("read values %1", read_values);
+ IscsiServerFunctions::parseConfig( read_values );
  return true;
 }
 
@@ -109,7 +111,7 @@ boolean writeConfig(){
  });
 
  config_file["value"] = value;
- y2milestone("%1", config_file);
+ y2internal("config_file to write %1", config_file);
  // write it
  SCR::Write(.etc.ietd.all, config_file);
  SCR::Write(.etc.ietd, nil);
@@ -119,6 +121,7 @@ boolean writeConfig(){
 // test if required package ("iscsitarget") is installed
 boolean installed_packages(){
  boolean ret = false;
+ y2milestone("Check if iscsitarget is installed");
   if( !Package::InstallMsg( "iscsitarget",
             _("<p>To configure the iSCSI target, the <b>%1</b> package must be installed.</p>") +
             _("<p>Install it now?</p>")) )
@@ -141,9 +144,11 @@ y2internal("Service status = %1", serviceStatus);
 
 // set service status
 boolean setServiceStatus(){
- boolean ret = true;
- if (!serviceStatus) Service::Stop("iscsitarget");
- return ret;
+ if (!serviceStatus) {
+	 y2milestone("Stop iscsitarget service");
+	 Service::Stop("iscsitarget");
+	}
+ return true;
 }
 
 // #157643 - reload server
@@ -170,7 +175,7 @@ if (Popup::YesNo(_(
 
 	// delete targets
 	 foreach(string row, changes["del"]:[], {
-	  y2internal("to delete %1", row);
+	  y2milestone("row to delete %1", row);
 	  string  target=((map<string, any>)SCR::Execute(.target.bash_output,
 		// get TID number for target
 		"cat /proc/net/iet/volume|grep $TARGET", $["TARGET":row]))["stdout"]:"" ;
@@ -182,13 +187,14 @@ if (Popup::YesNo(_(
 
 	// add a new target
 	 foreach(string row, changes["add"]:[], {
-          y2internal("to add %1", row);
+          y2milestone("row to add %1", row);
 	// create new target
 	 SCR::Execute(.target.bash_output, "ietadm --op new --tid=0 --params Name=$NAME", $["NAME":row]);
           string  target=((map<string, any>)SCR::Execute(.target.bash_output,
                 "cat /proc/net/iet/volume|grep $TARGET", $["TARGET":row]))["stdout"]:"" ;
 	// get TID of that target
           string to_add = splitstring( splitstring(target, " ")[0]:"", ":")[1]:"";
+	  y2internal("to add %1", to_add);
 	 list<string> lun = [];
 	 list <string> secret = [];
 	// add authentication to target
@@ -214,7 +220,6 @@ if (Popup::YesNo(_(
 	 y2internal("lun %1,%2", lun_num, lun_path);
 	 });
       }
-
  return true;
 }
 
@@ -410,7 +415,9 @@ global map AutoPackages() {
 
 // get/set service accessors for CWMService component
 global boolean GetStartService() {
- return Service::Enabled("iscsitarget");
+ boolean status = Service::Enabled("iscsitarget");
+ y2milestone("iscsitarget service status %1", status);
+ return status;
 }
 
 global void SetStartService(boolean status) {
