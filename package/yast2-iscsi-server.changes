@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May  9 11:18:05 CEST 2006 - mzugec@suse.cz
+
+- fixed #173818 - support for autoyast
+
+-------------------------------------------------------------------
 Mon Apr 24 11:13:41 CEST 2006 - mzugec@suse.cz
 
 - fixed #168732 - deleted values from auth are stored 

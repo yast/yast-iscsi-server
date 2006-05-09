@@ -37,6 +37,7 @@ global boolean Modified();
  * Data was modified?
  */
 global boolean modified = false;
+global boolean configured = false;
 
 /**
  */
@@ -215,7 +216,6 @@ if (Popup::YesNo(_(
 	 string lun_path = splitstring(lun[1]:"", ",")[0]:"";
 	// add LUN for target
 	string command = sformat("ietadm --op new --tid=%1 --lun=%2 --params %3", to_add, lun_num, lun_path);
-//	y2internal("command: %1", command);
 	SCR::Execute(.target.bash_output, command, $[]);
 	 y2milestone("lun %1,%2", lun_num, lun_path);
 	 });
@@ -300,6 +300,7 @@ global boolean Read() {
 
     if(Abort()) return false;
     modified = false;
+    configured = true;
     return true;
 }
 
@@ -368,7 +369,54 @@ global boolean Write() {
  * @return boolean True on success
  */
 global boolean Import (map settings) {
-    // TODO FIXME: your code here (fill the above mentioned variables)...
+ foreach(string key, any value, (map<string, any>)settings, {
+  switch(key){
+   case("service") :
+		serviceStatus = (boolean) value;
+		break;
+   case("auth")	:
+	list<string> incom = [];
+	string outgoin = "";
+	foreach(map<string, any> row, (list<map<string, any> >)value, {
+	 if (row["KEY"]:""=="IncomingUser") incom = add(incom, row["VALUE"]:"");
+		else outgoin = row["VALUE"]:"";
+	});
+		IscsiServerFunctions::setAuth(incom, outgoin);
+		break;
+   case("targets") :
+	string name = "";
+	string lun = "";
+	list<string> inc = [];
+	string out = "";
+	foreach(list< map<string, any> > val, (list<list<map<string, any> > >)value, {
+	name="";
+	lun="";
+	inc=[];
+	out="";
+	 foreach(map<string, any> row, val, {
+	  switch(row["KEY"]:""){
+	   case("Target"):
+			name = row["VALUE"]:"";
+			break;
+	   case("Lun"):
+			lun = row["VALUE"]:"";
+			break;
+	   case("IncomingUser"):
+			inc = add(inc, row["VALUE"]:"");
+			break;
+	   case("OutgoingUser"):
+			out = row["VALUE"]:"";
+			break;
+	  }
+	 });
+	 IscsiServerFunctions::addTarget(name, lun);
+	 IscsiServerFunctions::setTargetAuth(name, inc, out);
+	});
+		break;
+  }
+ });
+
+ configured = true;
     return true;
 }
 
@@ -378,8 +426,51 @@ global boolean Import (map settings) {
  * @return map Dumped settings (later acceptable by Import ())
  */
 global map Export () {
-    // TODO FIXME: your code here (return the above mentioned variables)...
-    return $[];
+ list targets = [];
+ foreach(string k, any v, IscsiServerFunctions::getTargets(), {
+  targets = add(targets, v);
+ });
+
+ map result = $[
+	       "version" : "1.0",
+	       "service" : serviceStatus,
+	       "auth"	 : IscsiServerFunctions::getConfig()["auth"]:[],
+	       "targets" : targets
+ 		];
+  configured = true;
+    return result;
+}
+
+boolean noAuth(list<map<string,any> > config){
+ boolean ret = true;
+ foreach(map<string, any> row, config, {
+  if (row["KEY"]:""=="IncomingUser" || row["KEY"]:""=="OutgoingUser") ret=false;
+ });
+ return ret;
+}
+
+boolean authIn(list<map<string,any> > config){
+ boolean ret = false;
+ foreach(map<string, any> row, config, {
+  if (row["KEY"]:""=="IncomingUser") ret=true;
+ });
+ return ret;
+}
+
+boolean authOut(list<map<string,any> > config){
+ boolean ret = false;
+ foreach(map<string, any> row, config, {
+  if (row["KEY"]:""=="OutgoingUser") ret=true;
+ });
+ return ret;
+}
+
+string getLun(list<map<string,any> > config){
+ string ret = "";
+ foreach(map<string, any> row, config, {
+  if (row["KEY"]:""=="Lun") ret=row["VALUE"]:"";
+ });
+ return ret;
 }
 
 /**
@@ -387,9 +478,37 @@ global map Export () {
  * @return summary of the current configuration
  */
 global list Summary() {
+ string summary = _("Configuration summary...");
+  if (configured){
+	summary = Summary::AddHeader("", _("Global"));
+	if (serviceStatus) summary = Summary::AddLine(summary, _("When Booting"));
+		else summary = Summary::AddLine(summary, _("Manually"));
+	if (noAuth(IscsiServerFunctions::getConfig()["auth"]:[])) summary = Summary::AddLine(summary, _("No Authentication"));
+	 else {
+	  if(authIn(IscsiServerFunctions::getConfig()["auth"]:[])) summary = Summary::AddLine(summary, _("Incoming Authentication"));
+	  if(authOut(IscsiServerFunctions::getConfig()["auth"]:[])) summary = Summary::AddLine(summary, _("Outgoing Authentication"));
+	 }
+	summary = Summary::AddHeader(summary, _("Targets"));
+	summary = Summary::OpenList(summary);
+	foreach(string key, any value, IscsiServerFunctions::getTargets(), {
+	 summary = Summary::AddListItem(summary, key);
+	 summary = Summary::AddLine(summary, getLun((list<map<string, any> >)value));
+         if (noAuth((list<map<string, any> >)value)) summary = Summary::AddLine(summary, _("No Authentication"));
+          else {
+           if(authIn((list<map<string, any> >)value)) summary = Summary::AddLine(summary, _("Incoming Authentication"));
+           if(authOut((list<map<string, any> >)value)) summary = Summary::AddLine(summary, _("Outgoing Authentication"));
+         }
+
+	});
+	summary = Summary::CloseList(summary);
+
+
+   } else {
+	summary = Summary::NotConfigured();
+	}
     // TODO FIXME: your code here...
     /* Configuration summary text for autoyast */
-    return [ _("Configuration summary..."), [] ];
+    return [ summary, [] ];
 }
 
 /**
@@ -422,6 +541,7 @@ global boolean GetStartService() {
 
 global void SetStartService(boolean status) {
  y2milestone("Set service status %1", status);
+ serviceStatus = status;
  if (status == true) Service::Enable("iscsitarget");
         else Service::Disable("iscsitarget");
 }

@@ -74,13 +74,21 @@ else if (func == "Read") {
     ret = IscsiServer::Read();
     Progress::set (progress_orig);
 }
-/* Write givven settings */
+/* Write given settings */
 else if (func == "Write") {
     import "Progress";
     boolean progress_orig = Progress::set (false);
     IscsiServer::write_only = true;
     ret = IscsiServer::Write();
     Progress::set (progress_orig);
+}
+
+else if (func == "GetModified"){
+ ret = IscsiServer::modified;
+}
+else if (func == "SetModified"){
+ IscsiServer::modified = true;
+ ret = true;
 }
 /* Unknown function */
 else {
