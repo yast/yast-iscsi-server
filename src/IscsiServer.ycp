@@ -25,8 +25,10 @@ import "Popup";
 import "SuSEFirewall";
 import "Confirm";
 import "IscsiServerFunctions";
+import "Mode";
 
 boolean serviceStatus = false;
+boolean statusOnStart = false;
 
 /**
  * Prototypes
@@ -137,18 +139,28 @@ boolean installed_packages(){
 // if not enabled, start it manually
 boolean getServiceStatus(){
  boolean ret = true;
- if (Service::Status("iscsitarget") == 0) serviceStatus=true;
-y2milestone("Service status = %1", serviceStatus);
- if (!serviceStatus) Service::Start("iscsitarget");
+ if (Service::Status("iscsitarget") == 0) {
+	 statusOnStart=true;
+	 serviceStatus=true;
+	}
+y2milestone("Service status = %1", statusOnStart);
+ if (!statusOnStart) Service::Start("iscsitarget");
  return ret;
 }
 
 // set service status
 boolean setServiceStatus(){
- if (!serviceStatus) {
+ boolean start=true;
+ if (!serviceStatus) start = statusOnStart;
+
+ if (!start) {
 	 y2milestone("Stop iscsitarget service");
 	 Service::Stop("iscsitarget");
-	}
+	} else {
+		y2milestone("Start iscsitarget service");
+		serviceStatus=true;
+		Service::Start("iscsitarget");
+		}
  return true;
 }
 
@@ -351,12 +363,14 @@ global boolean Write() {
     if(Abort()) return false;
     Progress::NextStage ();
     //  ask user whether reload or restart server and do it
-    if(!reloadServer()) return false;
+    if ( (serviceStatus) || (statusOnStart) )
+	if (!reloadServer()) return false;
     sleep(sl);
 
     if(Abort()) return false;
     Progress::NextStage();
     sleep(sl);
+
     // set iscsitarget initscript status
     if(!setServiceStatus()) return false;
     return true;

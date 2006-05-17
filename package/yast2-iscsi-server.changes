@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed May 17 17:48:38 CEST 2006 - mzugec@suse.cz
+
+- fixed #176186 - service status after YaST2 exit
+
+-------------------------------------------------------------------
 Tue May  9 11:18:05 CEST 2006 - mzugec@suse.cz
 
 - fixed #173818 - support for autoyast
