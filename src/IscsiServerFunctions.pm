@@ -119,6 +119,7 @@ sub addTarget {
   my $tmp_list = $config{$target} ; 
   push(@$tmp_list, {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$lun});
  } else {
+	 push(@{$changes{'add'}}, $target);
 	 $config{$target} = [ {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$lun} ];
 	}
 
@@ -218,7 +219,7 @@ sub writeConfig {
     foreach my $key (keys %new_config){
      if (! defined $config{$key}){
       delete($new_config{$key});
-      push(@{$changes{'del'}}, $key);
+#      push(@{$changes{'del'}}, $key);
      }
     }
 
@@ -226,7 +227,7 @@ sub writeConfig {
      if (! defined $new_config{$key}){
       # add new items
       addTo(\%new_config, $key);
-      push(@{$changes{'add'}}, $key) if ($key ne 'auth');
+#      push(@{$changes{'add'}}, $key) if ($key ne 'auth');
      } else {
 	 # for modifying store comments
 	 my %comments = ();
@@ -283,6 +284,47 @@ BEGIN { $TYPEINFO{getChanges} = ["function", ["map", "string", "any"] ]; }
 sub getChanges {
 #TODO - to 'add' and 'del' add all targets but not @connected from getConnected
  return \%changes;
+}
+
+
+# set modified for %changes
+BEGIN { $TYPEINFO{setModifChanges} = ["function", "integer", "string" ]; }
+sub setModifChanges {
+ my $self = shift;
+ my $target = shift;
+ my $ret = 0;
+
+ foreach my $section (("del", "add")){
+  foreach my $row (@{$changes{$section}}){
+   $ret=1 if ($row eq $target);
+  }}
+
+  if ($ret==0){
+   push(@{$changes{"del"}}, $target);
+   push(@{$changes{"add"}}, $target);
+  }
+
+ return \$ret;
+}
+
+
+# set deleted for %changes
+BEGIN { $TYPEINFO{setDelChanges} = ["function", "integer", "string" ]; }
+sub setDelChanges {
+ my $self = shift;
+ my $target = shift;
+ my $ret = 0;
+
+ foreach my $section (("del", "add")){
+  my @list=();
+  foreach my $row (@{$changes{$section}}){
+   push(@list, $row) if ($row ne $target);
+  }
+  $changes{$section}=\@list;
+ }
+  push(@{$changes{"del"}}, $target);
+
+ return \$ret;
 }
 
 1;

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu May 18 13:10:49 CEST 2006 - mzugec@suse.cz
+
+- fixed #148968 - do not restart unchanged targets
+
+-------------------------------------------------------------------
 Wed May 17 17:48:38 CEST 2006 - mzugec@suse.cz
 
 - fixed #176186 - service status after YaST2 exit

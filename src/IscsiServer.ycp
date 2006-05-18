@@ -178,6 +178,7 @@ if (Popup::YesNo(_(
 	 map<string, any> changes = IscsiServerFunctions::getChanges();
 	 list<string> connected = IscsiServerFunctions::getConnected();
 	// plus add there all targets except with active sessions (it means delete and create as new each target)
+/*
          foreach(string key,any value, IscsiServerFunctions::getTargets(), {
 	 if ((!contains(connected, key))&&(!contains(changes["add"]:[], key))&&(!contains(changes["del"]:[], key))){
 	   changes["del"] = add (changes["del"]:[], key);
@@ -185,17 +186,19 @@ if (Popup::YesNo(_(
            y2milestone("modified key %1", key);
 	  }
          });
-
+*/
 	// delete targets
 	 foreach(string row, changes["del"]:[], {
-	  y2milestone("row to delete %1", row);
-	  string  target=((map<string, any>)SCR::Execute(.target.bash_output,
+	  if (!contains(connected, row)){
+	   y2milestone("row to delete %1", row);
+	   string  target=((map<string, any>)SCR::Execute(.target.bash_output,
 		// get TID number for target
 		"cat /proc/net/iet/volume|grep $TARGET", $["TARGET":row]))["stdout"]:"" ;
-	  string to_delete = splitstring( splitstring(target, " ")[0]:"", ":")[1]:"";
-	  y2milestone("to delete %1", to_delete);
-	// delete record with that TID
-	  SCR::Execute(.target.bash_output, "ietadm --op delete --tid=$TID", $["TID":to_delete]);
+	   string to_delete = splitstring( splitstring(target, " ")[0]:"", ":")[1]:"";
+	   y2milestone("to delete %1", to_delete);
+	   // delete record with that TID
+	   SCR::Execute(.target.bash_output, "ietadm --op delete --tid=$TID", $["TID":to_delete]);
+	  } else y2error("Cannot remove target %1 - already connected", row);
 	 });
 
 	// add a new target
@@ -231,6 +234,7 @@ if (Popup::YesNo(_(
 	SCR::Execute(.target.bash_output, command, $[]);
 	 y2milestone("lun %1,%2", lun_num, lun_path);
 	 });
+	
       }
  return true;
 }

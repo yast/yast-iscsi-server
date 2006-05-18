@@ -110,6 +110,8 @@ symbol handleTable (string table, map event){
 		// add a new item
                 if (Popup::ContinueCancel(_("Really delete this item?"))){
                  integer del=tointeger( UI::QueryWidget(`id(`server), `CurrentItem) );
+		 string target = ((term)UI::QueryWidget(`id(`server), `Item(del)))[1]:"";
+                 IscsiServerFunctions::setDelChanges( target );
                  IscsiServerFunctions::removeItem( ((term)UI::QueryWidget(`id(`server), `Item(del)))[1]:"" );
 		 initTable("");
                 }
@@ -118,6 +120,8 @@ symbol handleTable (string table, map event){
 		// edit new item
 		integer edit=tointeger( UI::QueryWidget(`id(`server), `CurrentItem) );
 		curr_target = ((term)UI::QueryWidget(`id(`server), `Item(edit)))[1]:"";
+		if (IscsiServerFunctions::setModifChanges( curr_target ) == 0) y2milestone("modified %1", curr_target);
+			else y2error("%1 already modified", curr_target);
 		// goto EditDialog() (initModify)
 		ret = `edit;
 		break;
