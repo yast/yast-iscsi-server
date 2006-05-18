@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu May 18 15:31:47 CEST 2006 - mzugec@suse.cz
+
+- fixed #176724 - duplicates configuration entry
+
+-------------------------------------------------------------------
 Thu May 18 13:10:49 CEST 2006 - mzugec@suse.cz
 
 - fixed #148968 - do not restart unchanged targets

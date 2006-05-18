@@ -102,6 +102,12 @@ sub setTargetAuth {
     my $outgoing = shift;
     my $tmp_auth = $config{$target};
 
+  my @list=();
+  foreach my $row (@{$tmp_auth}){
+   push(@list, $row) if (($$row{'KEY'} ne 'IncomingUser')&&($$row{'KEY'} ne 'OutgoingUser'));
+  }
+  $tmp_auth=\@list;
+
 	foreach my $row (@incoming){
 	 push(@$tmp_auth, {'KEY'=>'IncomingUser', 'VALUE'=>$row});
 	}
@@ -117,6 +123,12 @@ sub addTarget {
 
  if (ref($config{$target})){
   my $tmp_list = $config{$target} ; 
+  my @list=();
+  foreach my $row (@{$tmp_list}){
+   push(@list, $row) if (($$row{'KEY'} ne 'Target')&&($$row{'KEY'} ne 'Lun'));
+  }
+  $tmp_list=\@list;
+
   push(@$tmp_list, {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$lun});
  } else {
 	 push(@{$changes{'add'}}, $target);
