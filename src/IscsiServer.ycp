@@ -78,6 +78,8 @@ global boolean Modified() {
     return modified;
 }
 
+
+
 // Settings: Define all variables needed for configuration of iscsi-server
 // TODO FIXME: Define all the variables necessary to hold
 // TODO FIXME: the configuration here (with the appropriate
@@ -427,7 +429,7 @@ global boolean Import (map settings) {
 			break;
 	  }
 	 });
-	 IscsiServerFunctions::addTarget(name, lun);
+	 IscsiServerFunctions::addNewTarget(name, lun);
 	 IscsiServerFunctions::setTargetAuth(name, inc, out);
 	});
 		break;

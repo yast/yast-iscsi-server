@@ -19,6 +19,8 @@ my %config_file = ();
 # for remember add and deleted targets
 my %changes = ();
 
+my @new_target = ();
+
 # read data given from ini-agent and put values into %config map
 BEGIN { $TYPEINFO{parseConfig} = ["function", ["map", "string", "any"], ["map", "string", "any"] ]; }
 sub parseConfig {
@@ -100,41 +102,61 @@ sub setTargetAuth {
     my $target = shift;
     my @incoming = @{+shift};
     my $outgoing = shift;
-    my $tmp_auth = $config{$target};
+    my $tmp_auth = \@new_target;
 
-  my @list=();
+  my @before_values=();
   foreach my $row (@{$tmp_auth}){
-   push(@list, $row) if (($$row{'KEY'} ne 'IncomingUser')&&($$row{'KEY'} ne 'OutgoingUser'));
+   push(@before_values, $row) if (($$row{'KEY'} ne 'IncomingUser')&&($$row{'KEY'} ne 'OutgoingUser'));
   }
-  $tmp_auth=\@list;
+  @{$tmp_auth}=@before_values;
 
-	foreach my $row (@incoming){
-	 push(@$tmp_auth, {'KEY'=>'IncomingUser', 'VALUE'=>$row});
-	}
+ foreach my $row (@incoming){
+  push(@$tmp_auth, {'KEY'=>'IncomingUser', 'VALUE'=>$row});
+ }
  push(@$tmp_auth, {'KEY'=>'OutgoingUser', 'VALUE'=>$outgoing}) if ($outgoing =~/[\w]+/);
+
+# @new_target = @$tmp_auth;
 }
 
 # create new target
-BEGIN { $TYPEINFO{addTarget} = ["function", "void", "string", "string" ] ; }
-sub addTarget {
+BEGIN { $TYPEINFO{addNewTarget} = ["function", "void", "string", "string" ] ; }
+sub addNewTarget {
  my $self = shift;
  my $target = shift;
  my $lun = shift;
 
+my @tmp_list = ( {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$lun} );
+
  if (ref($config{$target})){
-  my $tmp_list = $config{$target} ; 
+  my @tmp_list = @{$config{$target}};
   my @list=();
-  foreach my $row (@{$tmp_list}){
+  foreach my $row (@tmp_list){
    push(@list, $row) if (($$row{'KEY'} ne 'Target')&&($$row{'KEY'} ne 'Lun'));
   }
-  $tmp_list=\@list;
+  @tmp_list=@list;
+  @new_target = @tmp_list;
+ push(@new_target, ( {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$lun} ));
+ } else { @new_target = ( {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$lun} ); }
+}
 
-  push(@$tmp_list, {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$lun});
- } else {
-	 push(@{$changes{'add'}}, $target);
-	 $config{$target} = [ {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$lun} ];
-	}
 
+BEGIN { $TYPEINFO{saveNewTarget} = ["function", "void", "string" ] ; }
+sub saveNewTarget {
+ my $self = shift;
+ my $target = shift;
+
+ @{$config{$target}} = @new_target;
+ @new_target=();
+}
+
+
+BEGIN { $TYPEINFO{editTarget} = ["function", ["list", "any"], "string" ] ; }
+sub editTarget {
+ my $self = shift;
+ my $target = shift;
+
+ @new_target = @{$config{$target}};
+ return $config{$target};
 }
 
 
@@ -294,7 +316,6 @@ return \@connected;
 # accessor for %changes
 BEGIN { $TYPEINFO{getChanges} = ["function", ["map", "string", "any"] ]; }
 sub getChanges {
-#TODO - to 'add' and 'del' add all targets but not @connected from getConnected
  return \%changes;
 }
 

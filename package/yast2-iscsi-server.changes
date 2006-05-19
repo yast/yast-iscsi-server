@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri May 19 16:43:52 CEST 2006 - mzugec@suse.cz
+
+- fixed #177060 incorrect storing data between dialogs 
+
+-------------------------------------------------------------------
 Thu May 18 15:31:47 CEST 2006 - mzugec@suse.cz
 
 - fixed #176724 - duplicates configuration entry

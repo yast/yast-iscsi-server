@@ -104,6 +104,7 @@ symbol handleTable (string table, map event){
  switch((symbol)event["ID"]:nil){
   case(`add)        :
 		// goto  AddDialog() (initAddTarget)
+		
                 ret = `add;
                 break;
   case(`del)        :
@@ -176,7 +177,10 @@ void initGlobal (string key){
 // save discovery authentication or authentication for given target
 void storeGlobal(string option_id, map option_map){
    if (size(curr_target)>0){
+
     IscsiServerFunctions::setTargetAuth( curr_target, getIncomingValues(), getOutgoingValues() );
+    IscsiServerFunctions::saveNewTarget(curr_target);
+
    } else{
 	IscsiServerFunctions::setAuth( getIncomingValues(), getOutgoingValues() );
    }
@@ -217,7 +221,7 @@ void storeAddTarget(string option_id, map option_map){
  string lun = sformat("%1 Path=%2,Type=fileio",UI::QueryWidget(`id(`lun), `Value), UI::QueryWidget(`id(`path), `Value) );
 // add/modify that values
  y2milestone("Add target %1 with lun %2", target, lun);
- IscsiServerFunctions::addTarget(target, lun);
+ IscsiServerFunctions::addNewTarget(target, lun);
  curr_target = target;
 }
 
@@ -325,7 +329,7 @@ symbol handleAuth(string key, map event){
 
 // init values for modifying target (read it from stored map)
 void initModify (string key) ``{
- foreach( map<string, any> row, (list<map<string, any> >) IscsiServerFunctions::getConfig()[curr_target]:[], {
+ foreach( map<string, any> row, (list<map<string, any> >) IscsiServerFunctions::editTarget( curr_target ), {
   switch(row["KEY"]:""){
    case("Target")       :
 		UI::ChangeWidget( `id(`target),`Value, (splitstring(row["VALUE"]:"", ":"))[0]:"");
