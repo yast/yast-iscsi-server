@@ -169,12 +169,12 @@ boolean setServiceStatus(){
 // #157643 - reload server
 boolean reloadServer(){
 // ask user whether reload or restart server
-if (Popup::YesNo(_(
-"If changes have been made, the iSCSI target is not able \n"
-"to reload current configuration. It can only restart.\n"
-"When restarting, all sessions are aborted.\n"
-"Restart the iscsitarget service?"
-))) Service::Restart("iscsitarget");
+// #180205 - gettext problem - string wasn't marked to translate
+if (Popup::YesNo(_( "If changes have been made, the iSCSI target is not able
+to reload current configuration. It can only restart.
+When restarting, all sessions are aborted.
+Restart the iscsitarget service?
+"))) Service::Restart("iscsitarget");
  else {
 	// get changes from perl module
 	 map<string, any> changes = IscsiServerFunctions::getChanges();

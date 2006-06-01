@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun  1 10:55:13 CEST 2006 - mzugec@suse.cz
+
+- fixed #180205 - because of gettext problem, one string wasn't mark for translation
+
+-------------------------------------------------------------------
 Fri May 19 16:43:52 CEST 2006 - mzugec@suse.cz
 
 - fixed #177060 incorrect storing data between dialogs 
