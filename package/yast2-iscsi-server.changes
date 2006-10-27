@@ -1,7 +1,9 @@
 -------------------------------------------------------------------
 Thu Jun  1 10:55:13 CEST 2006 - mzugec@suse.cz
 
-- fixed #180205 - because of gettext problem, one string wasn't mark for translation
+- fixed #180205 - because of gettext problem, 
+  one string wasn't mark for translation
+- 2.14.0
 
 -------------------------------------------------------------------
 Fri May 19 16:43:52 CEST 2006 - mzugec@suse.cz
