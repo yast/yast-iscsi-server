@@ -29,7 +29,9 @@ any MainSequence() {
 	"summary"	:   ``( SummaryDialog() ),
 	"add"		:   ``( AddDialog() ),
 	"edit"		:   ``( EditDialog() ),
-	"auth"		:   ``( AuthDialog() )
+	"auth"		:   ``( AuthDialog() ),
+	"expert"	:   ``( ExpertDialog()),
+	"lun"		:   ``( LUNDialog() )
     ];
 
     /* FIXME: adapt to your needs */
@@ -44,6 +46,18 @@ any MainSequence() {
 	"add"	: $[
 	    `abort	: `abort,
 	    `next	: "auth",
+	    `back	: `back,
+	    `expert	: "expert",
+	    `lun_add	: "lun"
+	],
+	"lun"	: $[
+	    `abort	: `abort,
+	    `next	: "add",
+	    `back	: `back
+	],
+	"expert"	: $[
+	    `abort	: `abort,
+	    `next	: "add",
 	    `back	: `back
 	],
 	"edit"	: $[

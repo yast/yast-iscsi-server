@@ -181,17 +181,80 @@ map<string, map <string, any> > widgets = $[
 			  `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example"),
 			  `TextEntry(`id(`identifier), _("Identifier"), "test")
 			),
-		  `HBox(
-			  `TextEntry(`id(`lun), _("LUN"), "0"),
-			  `TextEntry(`id(`path), _("Path"), "/tmp/file")
-			)
+                        `VBox(
+				`Table(`id(`lun_table),
+					`header(_("LUN"), _("Value")),
+					 []
+				),
+			  `Left(
+			     `HBox(
+				`PushButton(`id(`add), _("Add")),
+				`PushButton(`id(`edit), _("Edit")),
+				`PushButton(`id(`delete), _("Delete"))
+				)
+			      )
+                          ),
+			`Left( `PushButton(`id(`expert), _("Expert Settings")) )
                  ),
 
         "init"   : initAddTarget,
         "store"  : storeAddTarget,
+	"handle" : handleAddTarget,
         "validate_type" : `function,
         "validate_function" : validateAddTarget,
         "help" : HELPS["target-add"]:""
+        ],
+
+	// dialog for expert settings
+     "expert" : $[
+        "widget" : `custom,
+        "custom_widget" :
+                 `VBox(
+                        `VBox(
+				`Table(`id(`expert_table),
+					`header(_("Key"), _("Value")),
+					 []
+				),
+			  `Left(
+			     `HBox(
+				`PushButton(`id(`add), _("Add")),
+				`PushButton(`id(`edit), _("Edit")),
+				`PushButton(`id(`delete), _("Delete"))
+				)
+			      )
+                          )
+                  ),
+//        "init"   : initGlobal,
+//        "handle" : handleAuth,
+//        "store"  : storeGlobal,
+        "help" : HELPS["expert"]:""
+        ],
+
+	// dialog for LUN details
+     "lun-details" : $[
+        "widget" : `custom,
+        "custom_widget" :
+                 `VBox(
+			`Left( `HWeight(3,  `TextEntry( `id( `lun ), "LUN", "0" )) ),
+			`VSpacing(2),
+			`RadioButtonGroup(`id(`rb),                           `VBox(
+			   `Left( `RadioButton(`id(`fileio), `opt(`notify), "Type=fileio", true) ),
+			   `HBox(
+				`TextEntry( `id( `file_path ), _("Path:") ),
+				`PushButton(`id(`browse), _("Browse"))
+				),
+			   `TextEntry( `id( `scsi_id ), _("SCSI ID:") ),
+			`VSpacing(2),
+
+			   `Left( `RadioButton(`id(`nullio), `opt(`notify), "Type=nullio") ),
+			   `TextEntry( `id( `sectors ), _("Sectors:") )
+			  )
+			 )
+		  ),
+//        "init"   : initLUN,
+        "handle" : handleLUN,
+//        "store"  : storeLUN,
+        "help" : HELPS["lun-details"]:""
         ],
 
 	// dialog for add/edit authentication for target
@@ -370,6 +433,65 @@ any EditDialog(){
     any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
     return ret;
 }
+
+// expert target dialog
+any ExpertDialog(){
+    string caption = _("iSCSI Target Expert Settings");
+    list<map <string, any> > w = CWM::CreateWidgets (["expert"], (map <string, map <string, any> >)widgets);
+        term contents =
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                w[0, "widget"]:`VSpacing (1),
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                               ),
+                          `VStretch()
+                        );
+
+    string help = CWM::MergeHelps(w);
+    contents = CWM::PrepareDialog(contents, w);
+    Wizard::SetContentsButtons(caption, contents, HELPS["expert"]:"",
+            Label::BackButton(), Label::NextButton());
+
+    any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
+    return ret;
+}
+
+// LUN details
+any LUNDialog(){
+    string caption = _("iSCSI Target LUN details");
+    list<map <string, any> > w = CWM::CreateWidgets (["lun-details"], (map <string, map <string, any> >)widgets);
+        term contents =
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                w[0, "widget"]:`VSpacing (1),
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                               ),
+                          `VStretch()
+                        );
+
+    string help = CWM::MergeHelps(w);
+    contents = CWM::PrepareDialog(contents, w);
+    Wizard::SetContentsButtons(caption, contents, HELPS["lun-details"]:"",
+            Label::BackButton(), Label::NextButton());
+
+    any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
+    return ret;
+}
+
 
 /* EOF */
 }

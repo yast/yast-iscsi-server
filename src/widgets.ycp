@@ -214,6 +214,22 @@ void initAddTarget(string key){
  UI::ChangeWidget(`id(`lun), `Value, tostring(IscsiServerFunctions::getNextLun()) );
 }
 
+symbol handleAddTarget (string table, map event){
+ symbol ret = nil;
+ if(event["EventReason"]:"" == "Activated"){
+  switch((symbol)event["ID"]:nil){
+   case(`add)        : y2internal("add");
+			return `lun_add;
+   case(`edit)        : y2internal("edit");
+			break;
+   case(`delete)        : y2internal("delete");
+			break;
+   case(`expert)        : y2internal("expert");
+			return `expert;
+
+  }
+ }
+}
 // save values
 void storeAddTarget(string option_id, map option_map){
  list<map<string, any> > old = [];
@@ -346,6 +362,21 @@ void initModify (string key) ``{
                 break;
   }
  });
+}
+
+//	************** LUN Detail Dialog ****************************
+symbol handleLUN(string key, map event){
+ boolean enable=false;
+ if ((boolean)UI::QueryWidget(`fileio, `Value)==true) enable=true;
+
+  UI::ChangeWidget(`file_path, `Enabled, enable);
+  UI::ChangeWidget(`browse, `Enabled, enable);
+  UI::ChangeWidget(`scsi_id, `Enabled, enable);
+  UI::ChangeWidget(`sectors, `Enabled, !enable);
+
+ if (event["EventReason"]:"" == "ValueChanged"){
+  y2internal("key=%1, event=%2", key, event);
+ }
 }
 
 
