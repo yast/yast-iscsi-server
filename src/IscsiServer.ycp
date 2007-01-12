@@ -96,7 +96,6 @@ global boolean Modified() {
 // read configuration file /etc/ietd.conf
 global boolean readConfig(){
  map<string, any> read_values =  (map<string, any>)SCR::Read(.etc.ietd.all);
- y2milestone("read values %1", read_values);
  IscsiServerFunctions::parseConfig( read_values );
  return true;
 }

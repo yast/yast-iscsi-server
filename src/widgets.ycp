@@ -211,7 +211,7 @@ void initAddTarget(string key){
  y2milestone("init values for add_target %1", target);
  UI::ChangeWidget(`id(`target), `Value, target);
  UI::ChangeWidget(`id(`identifier), `Value, uuid);
- UI::ChangeWidget(`id(`lun), `Value, tostring(IscsiServerFunctions::getNextLun()) );
+// UI::ChangeWidget(`id(`lun), `Value, tostring(IscsiServerFunctions::getNextLun()) );
 }
 
 symbol handleAddTarget (string table, map event){
@@ -244,18 +244,20 @@ void storeAddTarget(string option_id, map option_map){
 // validate function checks if target/lun are unique and not empty
 boolean validateAddTarget(string key, map event){
  string target = tostring( UI::QueryWidget(`id(`target), `Value)    );
- string lun = tostring(    UI::QueryWidget(`id(`lun), `Value)       );
+// string lun = tostring(    UI::QueryWidget(`id(`lun), `Value)       );
  string type = "no";
  if (( size(target)==0 && (Popup::Error(_("The target cannot be empty."))==nil) ) ||
         ( IscsiServerFunctions::ifExists("Target", target) && (Popup::Error(_("The target already exists."))==nil) )){
   UI::SetFocus(`id(`target));
   return false;
  }
+/*
  if ((size(lun)==0 && (Popup::Error(_("The logical unit definition cannot be empty."))==nil))||
         ( IscsiServerFunctions::ifExists("Lun", lun) && (Popup::Error(_("The logical unit already exists."))==nil))){
   UI::SetFocus(`id(`lun));
   return false;
  }
+*/
  return true;
 }
 
@@ -345,6 +347,7 @@ symbol handleAuth(string key, map event){
 
 // init values for modifying target (read it from stored map)
 void initModify (string key) ``{
+    list <term> inc_items = [];
  foreach( map<string, any> row, (list<map<string, any> >) IscsiServerFunctions::editTarget( curr_target ), {
   switch(row["KEY"]:""){
    case("Target")       :
@@ -355,10 +358,11 @@ void initModify (string key) ``{
 
                 break;
    case("Lun")          :
-		list<string> lun = splitstring(row["VALUE"]:"", " ");
-		UI::ChangeWidget(`id(`lun), `Value, lun[0]:"");
-		string full_path = (splitstring(lun[1]:"", ","))[0]:"";
-		UI::ChangeWidget(`id(`path), `Value, (splitstring(full_path, "="))[1]:"" );
+     inc_items = add(inc_items, `item(`id(size(inc_items)), row["KEY"]:"", row["VALUE"]:""));
+     // put it into table
+     UI::ChangeWidget(`id(`lun_table), `Items, inc_items);
+
+y2internal("row %1", row);
                 break;
   }
  });
@@ -374,10 +378,16 @@ symbol handleLUN(string key, map event){
   UI::ChangeWidget(`scsi_id, `Enabled, enable);
   UI::ChangeWidget(`sectors, `Enabled, !enable);
 
- if (event["EventReason"]:"" == "ValueChanged"){
+ if (event["EventReason"]:"" == "Activated" && event["WidgetID"]:nil == `browse){
   y2internal("key=%1, event=%2", key, event);
+  string file = UI::AskForExistingFile("/", "", _(""));
+  if (file!=nil) UI::ChangeWidget(`file_path, `Value, file);
  }
 }
 
+void storeLUN(string option_id, map option_map){
+ string lun=(string)UI::QueryWidget(`lun, `Value);
+ y2internal("%1", IscsiServerFunctions::getTargets());
+}
 
 }

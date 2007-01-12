@@ -88,9 +88,79 @@ map tabs_descr = $[
                           `VStretch()
                         ),
          "widget_names" : [ "server_table" ]
-        ]
+        ],
+	"target-details":$[
+	  "contents" :
+                 `VBox(
+		  `HBox(
+			  `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example"),
+			  `TextEntry(`id(`identifier), _("Identifier"), "test")
+			),
+                        `VBox(
+				`Table(`id(`lun_table),
+					`header(_("LUN"), _("Value")),
+					 []
+				),
+			  `Left(
+			     `HBox(
+				`PushButton(`id(`add), _("Add")),
+				`PushButton(`id(`edit), _("Edit")),
+				`PushButton(`id(`delete), _("Delete"))
+				)
+			      )
+                          ),
+			`Left( `PushButton(`id(`expert), _("Expert Settings")) )
+                 ),
 
-	];
+	],
+	"lun-details":$[
+	  "contents" :
+                 `VBox(
+			`Left( `HWeight(3,  `TextEntry( `id( `lun ), "LUN", "0" )) ),
+			`VSpacing(2),
+			`RadioButtonGroup(`id(`rb),                           `VBox(
+			   `Left( `RadioButton(`id(`fileio), `opt(`notify), "Type=fileio", true) ),
+			   `HBox(
+				`TextEntry( `id( `file_path ), _("Path:") ),
+				`PushButton(`id(`browse), _("Browse"))
+				),
+			   `TextEntry( `id( `scsi_id ), _("SCSI ID:") ),
+			`VSpacing(2),
+
+			   `Left( `RadioButton(`id(`nullio), `opt(`notify), "Type=nullio") ),
+			   `TextEntry( `id( `sectors ), _("Sectors:") )
+			  )
+			 )
+		  ),
+	],
+	"auth": $[
+	 "contents" :
+                 `VBox(
+                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("No Authentication"), true) ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Authentication"), false) ),
+                        `VBox(
+				`Table(`id(`incoming_table),
+					`header(_("Username"), _("Password")),
+					 []
+				),
+			  `Left(
+			     `HBox(
+				`PushButton(`id(`add), _("Add")),
+				`PushButton(`id(`edit), _("Edit")),
+				`PushButton(`id(`delete), _("Delete"))
+				)
+			      )
+                          ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Authentication"), false) ),
+                        `HBox(
+                                `TextEntry(`id(`user_out), _("Username")), `Password(`id(`pass_out), _("Password"))
+                          )
+                  )
+	]
+
+       ];
 
 
 
@@ -119,30 +189,7 @@ map<string, map <string, any> > widgets = $[
 	// discovery authentication dialog
      "global_config" : $[
         "widget" : `custom,
-        "custom_widget" :
-                 `VBox(
-                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("No Authentication"), true) ),
-                        `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Authentication"), false) ),
-                        `VBox(
-				`Table(`id(`incoming_table),
-					`header(_("Username"), _("Password")),
-					 []
-				),
-			  `Left(
-			     `HBox(
-				`PushButton(`id(`add), _("Add")),
-				`PushButton(`id(`edit), _("Edit")),
-				`PushButton(`id(`delete), _("Delete"))
-				)
-			      )
-                          ),
-                        `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Authentication"), false) ),
-                        `HBox(
-                                `TextEntry(`id(`user_out), _("Username")), `Password(`id(`pass_out), _("Password"))
-                          )
-                  ),
+        "custom_widget" : tabs_descr["auth", "contents"]:nil,
         "init"   : initGlobal,
         "handle" : handleAuth,
         "store"  : storeGlobal,
@@ -175,28 +222,7 @@ map<string, map <string, any> > widgets = $[
 	// dialog for add new target
      "target-add" : $[
         "widget" : `custom,
-        "custom_widget" :
-                 `VBox(
-		  `HBox(
-			  `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example"),
-			  `TextEntry(`id(`identifier), _("Identifier"), "test")
-			),
-                        `VBox(
-				`Table(`id(`lun_table),
-					`header(_("LUN"), _("Value")),
-					 []
-				),
-			  `Left(
-			     `HBox(
-				`PushButton(`id(`add), _("Add")),
-				`PushButton(`id(`edit), _("Edit")),
-				`PushButton(`id(`delete), _("Delete"))
-				)
-			      )
-                          ),
-			`Left( `PushButton(`id(`expert), _("Expert Settings")) )
-                 ),
-
+        "custom_widget" : tabs_descr["target-details", "contents"]:nil,
         "init"   : initAddTarget,
         "store"  : storeAddTarget,
 	"handle" : handleAddTarget,
@@ -233,57 +259,17 @@ map<string, map <string, any> > widgets = $[
 	// dialog for LUN details
      "lun-details" : $[
         "widget" : `custom,
-        "custom_widget" :
-                 `VBox(
-			`Left( `HWeight(3,  `TextEntry( `id( `lun ), "LUN", "0" )) ),
-			`VSpacing(2),
-			`RadioButtonGroup(`id(`rb),                           `VBox(
-			   `Left( `RadioButton(`id(`fileio), `opt(`notify), "Type=fileio", true) ),
-			   `HBox(
-				`TextEntry( `id( `file_path ), _("Path:") ),
-				`PushButton(`id(`browse), _("Browse"))
-				),
-			   `TextEntry( `id( `scsi_id ), _("SCSI ID:") ),
-			`VSpacing(2),
-
-			   `Left( `RadioButton(`id(`nullio), `opt(`notify), "Type=nullio") ),
-			   `TextEntry( `id( `sectors ), _("Sectors:") )
-			  )
-			 )
-		  ),
+        "custom_widget" : tabs_descr["lun-details", "contents"]:nil,
 //        "init"   : initLUN,
         "handle" : handleLUN,
-//        "store"  : storeLUN,
+        "store"  : storeLUN,
         "help" : HELPS["lun-details"]:""
         ],
 
 	// dialog for add/edit authentication for target
      "target-auth" : $[
         "widget" : `custom,
-        "custom_widget" :
-                 `VBox(
-                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("No Authentication"), true) ),
-                        `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Authentication"), false) ),
-                        `VBox(
-				`Table(`id(`incoming_table),
-					`header(_("Username"), _("Password")),
-					 []
-				),
-			  `Left(
-			     `HBox(
-				`PushButton(`id(`add), _("Add")),
-				`PushButton(`id(`edit), _("Edit")),
-				`PushButton(`id(`delete), _("Delete"))
-				)
-			      )
-                          ),
-                        `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Authentication"), false) ),
-                        `HBox(
-                                `TextEntry(`id(`user_out), _("Username")), `Password(`id(`pass_out), _("Password"))
-                          )
-                  ),
+        "custom_widget" : tabs_descr["auth", "contents"]:nil,
         "init"   : initGlobal,
         "handle" : handleAuth,
         "store"  : storeGlobal,
@@ -295,17 +281,7 @@ map<string, map <string, any> > widgets = $[
 	// dialog for modifying target
      "target-modify" : $[
         "widget" : `custom,
-        "custom_widget" :
-                 `VBox(
-                 `HBox(
-                          `TextEntry(`id(`target), _("Target")),
-                          `TextEntry(`id(`identifier), _("Identifier"))
-                        ),
-                  `HBox(
-                          `TextEntry(`id(`lun), _("LUN")),
-                          `TextEntry(`id(`path), _("Path"))
-                        )
-                 ),
+        "custom_widget" : tabs_descr["target-details", "contents"]:nil,
         "init"   : initModify,
         "store"  : storeAddTarget,
         "help" : HELPS["target-modify"]:""
