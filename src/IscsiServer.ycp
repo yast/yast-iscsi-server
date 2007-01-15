@@ -96,7 +96,6 @@ global boolean Modified() {
 // read configuration file /etc/ietd.conf
 global boolean readConfig(){
  map<string, any> read_values =  (map<string, any>)SCR::Read(.etc.ietd.all);
- y2milestone("read values %1", read_values);
  IscsiServerFunctions::parseConfig( read_values );
  return true;
 }
@@ -405,12 +404,12 @@ global boolean Import (map settings) {
 		break;
    case("targets") :
 	string name = "";
-	string lun = "";
+	list<map<string, any> > lun = [];
 	list<string> inc = [];
 	string out = "";
 	foreach(list< map<string, any> > val, (list<list<map<string, any> > >)value, {
 	name="";
-	lun="";
+	lun=[];
 	inc=[];
 	out="";
 	 foreach(map<string, any> row, val, {
@@ -419,7 +418,7 @@ global boolean Import (map settings) {
 			name = row["VALUE"]:"";
 			break;
 	   case("Lun"):
-			lun = row["VALUE"]:"";
+			lun = add(lun, row);
 			break;
 	   case("IncomingUser"):
 			inc = add(inc, row["VALUE"]:"");

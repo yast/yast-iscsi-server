@@ -18,9 +18,9 @@ import "IscsiServerFunctions";
 
 TEST(``(IscsiServer::readConfig()), [READ, $[], $[]], nil);
 DUMP(IscsiServerFunctions::getConfig());
-TEST(``(IscsiServerFunctions::removeItem("iqn.2006-04.suse.cz:308443b2-f0e6-465d-8889-ba290efedd58")), [READ, $[], $[]], nil);
+TEST(``(IscsiServerFunctions::removeTarget("iqn.2006-04.suse.cz:308443b2-f0e6-465d-8889-ba290efedd58")), [READ, $[], $[]], nil);
 DUMP(IscsiServerFunctions::getConfig());
-IscsiServerFunctions::addNewTarget("iqn.2006-04.suse.cz:123456789", "2 Path=/tmp/file,Type=fileio");
+IscsiServerFunctions::addNewTarget("iqn.2006-04.suse.cz:123456789", [ $["KEY":"Lun", "VALUE":"2 Path=/tmp/file,Type=fileio"] ] );
 IscsiServerFunctions::setTargetAuth("iqn.2006-04.suse.cz:123456789", ["one two", "three four"], "five six");
 TEST(``(IscsiServerFunctions::saveNewTarget("iqn.2006-04.suse.cz:123456789")), [READ, $[], $[]], nil);
 DUMP(IscsiServerFunctions::getConfig());

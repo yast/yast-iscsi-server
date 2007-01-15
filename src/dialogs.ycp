@@ -88,9 +88,59 @@ map tabs_descr = $[
                           `VStretch()
                         ),
          "widget_names" : [ "server_table" ]
-        ]
+        ],
+	"target-details":$[
+	  "contents" :
+                 `VBox(
+		  `HBox(
+			  `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example"),
+			  `TextEntry(`id(`identifier), _("Identifier"), "test")
+			),
+                        `VBox(
+				`Table(`id(`lun_table),
+					`header(_("LUN"), _("Value")),
+					 []
+				),
+			  `Left(
+			     `HBox(
+				`PushButton(`id(`add), _("Add")),
+				`PushButton(`id(`edit), _("Edit")),
+				`PushButton(`id(`delete), _("Delete"))
+				)
+			      )
+                          ),
+			`Left( `PushButton(`id(`expert),`opt(`disabled),  _("Expert Settings")) )
+                 ),
 
-	];
+	],
+	"auth": $[
+	 "contents" :
+                 `VBox(
+                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("No Authentication"), true) ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Authentication"), false) ),
+                        `VBox(
+				`Table(`id(`incoming_table),
+					`header(_("Username"), _("Password")),
+					 []
+				),
+			  `Left(
+			     `HBox(
+				`PushButton(`id(`add), _("Add")),
+				`PushButton(`id(`edit), _("Edit")),
+				`PushButton(`id(`delete), _("Delete"))
+				)
+			      )
+                          ),
+                        `VSpacing(2),
+                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Authentication"), false) ),
+                        `HBox(
+                                `TextEntry(`id(`user_out), _("Username")), `Password(`id(`pass_out), _("Password"))
+                          )
+                  )
+	]
+
+       ];
 
 
 
@@ -119,30 +169,7 @@ map<string, map <string, any> > widgets = $[
 	// discovery authentication dialog
      "global_config" : $[
         "widget" : `custom,
-        "custom_widget" :
-                 `VBox(
-                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("No Authentication"), true) ),
-                        `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Authentication"), false) ),
-                        `VBox(
-				`Table(`id(`incoming_table),
-					`header(_("Username"), _("Password")),
-					 []
-				),
-			  `Left(
-			     `HBox(
-				`PushButton(`id(`add), _("Add")),
-				`PushButton(`id(`edit), _("Edit")),
-				`PushButton(`id(`delete), _("Delete"))
-				)
-			      )
-                          ),
-                        `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Authentication"), false) ),
-                        `HBox(
-                                `TextEntry(`id(`user_out), _("Username")), `Password(`id(`pass_out), _("Password"))
-                          )
-                  ),
+        "custom_widget" : tabs_descr["auth", "contents"]:nil,
         "init"   : initGlobal,
         "handle" : handleAuth,
         "store"  : storeGlobal,
@@ -175,36 +202,23 @@ map<string, map <string, any> > widgets = $[
 	// dialog for add new target
      "target-add" : $[
         "widget" : `custom,
-        "custom_widget" :
-                 `VBox(
-		  `HBox(
-			  `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example"),
-			  `TextEntry(`id(`identifier), _("Identifier"), "test")
-			),
-		  `HBox(
-			  `TextEntry(`id(`lun), _("LUN"), "0"),
-			  `TextEntry(`id(`path), _("Path"), "/tmp/file")
-			)
-                 ),
-
+        "custom_widget" : tabs_descr["target-details", "contents"]:nil,
         "init"   : initAddTarget,
         "store"  : storeAddTarget,
+	"handle" : handleModify,
         "validate_type" : `function,
         "validate_function" : validateAddTarget,
         "help" : HELPS["target-add"]:""
         ],
 
-	// dialog for add/edit authentication for target
-     "target-auth" : $[
+	// dialog for expert settings
+     "expert" : $[
         "widget" : `custom,
         "custom_widget" :
                  `VBox(
-                        `Left( `CheckBox(`id(`auth_none),`opt(`notify), _("No Authentication"), true) ),
-                        `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_in),`opt(`notify), _("Incoming Authentication"), false) ),
                         `VBox(
-				`Table(`id(`incoming_table),
-					`header(_("Username"), _("Password")),
+				`Table(`id(`expert_table),
+					`header(_("Key"), _("Value")),
 					 []
 				),
 			  `Left(
@@ -214,13 +228,29 @@ map<string, map <string, any> > widgets = $[
 				`PushButton(`id(`delete), _("Delete"))
 				)
 			      )
-                          ),
-                        `VSpacing(2),
-                        `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Authentication"), false) ),
-                        `HBox(
-                                `TextEntry(`id(`user_out), _("Username")), `Password(`id(`pass_out), _("Password"))
                           )
                   ),
+//        "init"   : initGlobal,
+//        "handle" : handleAuth,
+//        "store"  : storeGlobal,
+        "help" : HELPS["expert"]:""
+        ],
+
+	// dialog for LUN details
+/*
+     "lun-details" : $[
+        "widget" : `custom,
+        "custom_widget" : tabs_descr["lun-details", "contents"]:nil,
+//        "init"   : initLUN,
+        "handle" : handleLUN,
+        "store"  : storeLUN,
+        "help" : HELPS["lun-details"]:""
+        ],
+*/
+	// dialog for add/edit authentication for target
+     "target-auth" : $[
+        "widget" : `custom,
+        "custom_widget" : tabs_descr["auth", "contents"]:nil,
         "init"   : initGlobal,
         "handle" : handleAuth,
         "store"  : storeGlobal,
@@ -232,19 +262,10 @@ map<string, map <string, any> > widgets = $[
 	// dialog for modifying target
      "target-modify" : $[
         "widget" : `custom,
-        "custom_widget" :
-                 `VBox(
-                 `HBox(
-                          `TextEntry(`id(`target), _("Target")),
-                          `TextEntry(`id(`identifier), _("Identifier"))
-                        ),
-                  `HBox(
-                          `TextEntry(`id(`lun), _("LUN")),
-                          `TextEntry(`id(`path), _("Path"))
-                        )
-                 ),
+        "custom_widget" : tabs_descr["target-details", "contents"]:nil,
         "init"   : initModify,
-        "store"  : storeAddTarget,
+	"handle" : handleModify,
+        "store"  : storeModify,
         "help" : HELPS["target-modify"]:""
         ]
 	];
@@ -370,6 +391,36 @@ any EditDialog(){
     any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
     return ret;
 }
+
+// expert target dialog
+any ExpertDialog(){
+    string caption = _("iSCSI Target Expert Settings");
+    list<map <string, any> > w = CWM::CreateWidgets (["expert"], (map <string, map <string, any> >)widgets);
+        term contents =
+                          `VBox(
+                          `VStretch(),
+                          `HBox(
+                           `HStretch(),
+                           `HSpacing (1),
+                            `VBox(
+                                w[0, "widget"]:`VSpacing (1),
+                                `VSpacing (2)
+                                ),
+                           `HSpacing (1),
+                           `HStretch()
+                               ),
+                          `VStretch()
+                        );
+
+    string help = CWM::MergeHelps(w);
+    contents = CWM::PrepareDialog(contents, w);
+    Wizard::SetContentsButtons(caption, contents, HELPS["expert"]:"",
+            Label::BackButton(), Label::NextButton());
+
+    any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
+    return ret;
+}
+
 
 /* EOF */
 }

@@ -44,9 +44,10 @@ sub parseConfig {
     return \%config;
 }
 
+# remove given target by name
 # remove item with given key from %config and return result 
-BEGIN { $TYPEINFO{removeItem} = ["function", ["map", "string", "any"], "string" ]; }
-sub removeItem {
+BEGIN { $TYPEINFO{removeTarget} = ["function", ["map", "string", "any"], "string" ]; }
+sub removeTarget {
     my $self = shift;
     my $key = shift;
     %config = %{$self->removeKeyFromMap(\%config, $key)};
@@ -118,14 +119,35 @@ sub setTargetAuth {
 # @new_target = @$tmp_auth;
 }
 
+# set LUN's for target
+BEGIN { $TYPEINFO{setLUN} = ["function", "void", "string", ["list", [ "map", "string", "any" ] ] ] ; }
+sub setLUN {
+ my $self = shift;
+ my $target = shift;
+ my $lun = shift;
+
+ if (ref($config{$target})){
+  my @tmp_list = @{$config{$target}};
+  my @list=();
+  foreach my $row (@tmp_list){
+   push(@list, $row) if ($row->{'KEY'} ne 'Lun');
+  }
+print Dumper(@list);
+  @tmp_list=@list;
+  @new_target = @tmp_list;
+  push(@new_target, @{$lun});
+ }  
+}
+
+
 # create new target
-BEGIN { $TYPEINFO{addNewTarget} = ["function", "void", "string", "string" ] ; }
+BEGIN { $TYPEINFO{addNewTarget} = ["function", "void", "string", ["list", [ "map", "string", "any" ] ]] ; }
 sub addNewTarget {
  my $self = shift;
  my $target = shift;
  my $lun = shift;
 
-my @tmp_list = ( {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$lun} );
+my @tmp_list = ( {'KEY'=>'Target', 'VALUE'=>$target} );
 
  if (ref($config{$target})){
   my @tmp_list = @{$config{$target}};
@@ -135,8 +157,10 @@ my @tmp_list = ( {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$l
   }
   @tmp_list=@list;
   @new_target = @tmp_list;
- push(@new_target, ( {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$lun} ));
- } else { @new_target = ( {'KEY'=>'Target', 'VALUE'=>$target}, {'KEY'=>'Lun', 'VALUE'=>$lun} ); }
+ push(@new_target, ( {'KEY'=>'Target', 'VALUE'=>$target} ));
+ } else { @new_target = ( {'KEY'=>'Target', 'VALUE'=>$target} ); }
+push(@new_target, @{$lun});
+print Dumper(\@new_target);
 }
 
 
@@ -182,21 +206,21 @@ sub ifExists {
 }
 
 # get highest lun +1
-BEGIN { $TYPEINFO{getNextLun} = [ "function", "integer" ] ; }
-sub getNextLun {
- my $self = shift;
- my $lun = -1;
- foreach my $target (keys %{$self->removeKeyFromMap(\%config, 'auth')}){
-  foreach my $tmp_hash (@{$config{$target}}){
-   if ($$tmp_hash{'KEY'} eq 'Lun'){
-    if ($$tmp_hash{'VALUE'}=~/([\d]+)[\s]*/) {
-     $lun=$1 if ($1>$lun);
-    }
-   }
-  }
- } 
- return $lun+1;
-}
+#BEGIN { $TYPEINFO{getNextLun} = [ "function", "integer" ] ; }
+#sub getNextLun {
+# my $self = shift;
+# my $lun = -1;
+# foreach my $target (keys %{$self->removeKeyFromMap(\%config, 'auth')}){
+#  foreach my $tmp_hash (@{$config{$target}}){
+#   if ($$tmp_hash{'KEY'} eq 'Lun'){
+#    if ($$tmp_hash{'VALUE'}=~/([\d]+)[\s]*/) {
+#     $lun=$1 if ($1>$lun);
+#    }
+#   }
+#  }
+# } 
+# return $lun+1;
+#}
 
 # internal function
 # create map from given map in format needed by ini-agent
