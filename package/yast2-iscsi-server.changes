@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jan 15 16:37:54 CET 2007 - mzugec@suse.cz
+
+- fate #300631 - Support Several LUNs for Target 
+
+-------------------------------------------------------------------
 Thu Jun  1 10:55:13 CEST 2006 - mzugec@suse.cz
 
 - fixed #180205 - because of gettext problem, 
