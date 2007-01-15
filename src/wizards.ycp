@@ -30,8 +30,7 @@ any MainSequence() {
 	"add"		:   ``( AddDialog() ),
 	"edit"		:   ``( EditDialog() ),
 	"auth"		:   ``( AuthDialog() ),
-	"expert"	:   ``( ExpertDialog()),
-	"lun"		:   ``( LUNDialog() )
+	"expert"	:   ``( ExpertDialog())
     ];
 
     /* FIXME: adapt to your needs */
@@ -48,12 +47,6 @@ any MainSequence() {
 	    `next	: "auth",
 	    `back	: `back,
 	    `expert	: "expert",
-	    `lun_add	: "lun"
-	],
-	"lun"	: $[
-	    `abort	: `abort,
-	    `next	: "add",
-	    `back	: `back
 	],
 	"expert"	: $[
 	    `abort	: `abort,

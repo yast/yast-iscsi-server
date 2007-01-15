@@ -109,29 +109,9 @@ map tabs_descr = $[
 				)
 			      )
                           ),
-			`Left( `PushButton(`id(`expert), _("Expert Settings")) )
+			`Left( `PushButton(`id(`expert),`opt(`disabled),  _("Expert Settings")) )
                  ),
 
-	],
-	"lun-details":$[
-	  "contents" :
-                 `VBox(
-			`Left( `HWeight(3,  `TextEntry( `id( `lun ), "LUN", "0" )) ),
-			`VSpacing(2),
-			`RadioButtonGroup(`id(`rb),                           `VBox(
-			   `Left( `RadioButton(`id(`fileio), `opt(`notify), "Type=fileio", true) ),
-			   `HBox(
-				`TextEntry( `id( `file_path ), _("Path:") ),
-				`PushButton(`id(`browse), _("Browse"))
-				),
-			   `TextEntry( `id( `scsi_id ), _("SCSI ID:") ),
-			`VSpacing(2),
-
-			   `Left( `RadioButton(`id(`nullio), `opt(`notify), "Type=nullio") ),
-			   `TextEntry( `id( `sectors ), _("Sectors:") )
-			  )
-			 )
-		  ),
 	],
 	"auth": $[
 	 "contents" :
@@ -225,7 +205,7 @@ map<string, map <string, any> > widgets = $[
         "custom_widget" : tabs_descr["target-details", "contents"]:nil,
         "init"   : initAddTarget,
         "store"  : storeAddTarget,
-	"handle" : handleAddTarget,
+	"handle" : handleModify,
         "validate_type" : `function,
         "validate_function" : validateAddTarget,
         "help" : HELPS["target-add"]:""
@@ -257,6 +237,7 @@ map<string, map <string, any> > widgets = $[
         ],
 
 	// dialog for LUN details
+/*
      "lun-details" : $[
         "widget" : `custom,
         "custom_widget" : tabs_descr["lun-details", "contents"]:nil,
@@ -265,7 +246,7 @@ map<string, map <string, any> > widgets = $[
         "store"  : storeLUN,
         "help" : HELPS["lun-details"]:""
         ],
-
+*/
 	// dialog for add/edit authentication for target
      "target-auth" : $[
         "widget" : `custom,
@@ -283,7 +264,8 @@ map<string, map <string, any> > widgets = $[
         "widget" : `custom,
         "custom_widget" : tabs_descr["target-details", "contents"]:nil,
         "init"   : initModify,
-        "store"  : storeAddTarget,
+	"handle" : handleModify,
+        "store"  : storeModify,
         "help" : HELPS["target-modify"]:""
         ]
 	];
@@ -433,35 +415,6 @@ any ExpertDialog(){
     string help = CWM::MergeHelps(w);
     contents = CWM::PrepareDialog(contents, w);
     Wizard::SetContentsButtons(caption, contents, HELPS["expert"]:"",
-            Label::BackButton(), Label::NextButton());
-
-    any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
-    return ret;
-}
-
-// LUN details
-any LUNDialog(){
-    string caption = _("iSCSI Target LUN details");
-    list<map <string, any> > w = CWM::CreateWidgets (["lun-details"], (map <string, map <string, any> >)widgets);
-        term contents =
-                          `VBox(
-                          `VStretch(),
-                          `HBox(
-                           `HStretch(),
-                           `HSpacing (1),
-                            `VBox(
-                                w[0, "widget"]:`VSpacing (1),
-                                `VSpacing (2)
-                                ),
-                           `HSpacing (1),
-                           `HStretch()
-                               ),
-                          `VStretch()
-                        );
-
-    string help = CWM::MergeHelps(w);
-    contents = CWM::PrepareDialog(contents, w);
-    Wizard::SetContentsButtons(caption, contents, HELPS["lun-details"]:"",
             Label::BackButton(), Label::NextButton());
 
     any ret = CWM::Run(w, $[`abort:ReallyAbort ]);
