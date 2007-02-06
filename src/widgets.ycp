@@ -85,13 +85,13 @@ map <string, any> LUNDetailDialog(map<string, any> values_before){
 		string lun=(string)UI::QueryWidget(`lun, `Value);
 		string value=lun;
 		if ((boolean)UI::QueryWidget(`fileio, `Value)==true){
-		 value=sformat("%1 Path=%2, Type=fileio", value, (string)UI::QueryWidget(`file_path, `Value));
+		 value=sformat("%1 Path=%2,Type=fileio", value, (string)UI::QueryWidget(`file_path, `Value));
 		 string scsi_id=(string)UI::QueryWidget(`scsi_id, `Value);
-		 if (size(scsi_id)>0) value=sformat("%1, ScsiId=%2", value, scsi_id);
+		 if (size(scsi_id)>0) value=sformat("%1,ScsiId=%2", value, scsi_id);
 		} else {
 			 value=sformat("%1 Type=nullio", value);
 			 string sectors=(string)UI::QueryWidget(`sectors, `Value);
-			 if (size(sectors)>0) value=sformat("%1, Sectors=%2", value, sectors);
+			 if (size(sectors)>0) value=sformat("%1,Sectors=%2", value, sectors);
 			}
 		ret_map = $["KEY":"Lun", "VALUE":value];
 		}
