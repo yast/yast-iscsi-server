@@ -1,4 +1,11 @@
 /**
+ if (size((list)UI::QueryWidget(`server, `Items))==0){
+  UI::ChangeWidget(`edit, `Enabled, false);
+  UI::ChangeWidget(`delete,  `Enabled, false);
+ } else {
+	  UI::ChangeWidget(`edit, `Enabled, true);
+	  UI::ChangeWidget(`delete,  `Enabled, true);
+	}
  * File:	include/iscsi-server/dialogs.ycp
  * Package:	Configuration of iscsi-server
  * Summary:	Dialogs definitions
@@ -190,7 +197,7 @@ map<string, map <string, any> > widgets = $[
 		  `HBox(
 		      `PushButton(`id(`add), _("Add")),
 		      `PushButton(`id(`edit), _("Edit")),
-		      `PushButton(`id(`del), _("Delete"))
+		      `PushButton(`id(`delete), _("Delete"))
 		       )
 		      )
 		     ),

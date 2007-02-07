@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Feb  7 16:27:01 CET 2007 - mzugec@suse.de
+
+- disable edit and delete buttons in empty table (#241804)
+- 2.14.3 
+
+-------------------------------------------------------------------
 Tue Feb  6 10:39:19 CET 2007 - mzugec@suse.de
 
 - remove spaces as separators between parameters in /etc/ietd.conf (#239555)

@@ -197,7 +197,7 @@ symbol handleTable (string table, map event){
 		// goto  AddDialog() (initAddTarget)
                 ret = `add;
                 break;
-  case(`del)        :
+  case(`delete)        :
 		// add a new item
                 if (Popup::ContinueCancel(_("Really delete this item?"))){
                  integer del=tointeger( UI::QueryWidget(`id(`server), `CurrentItem) );
@@ -218,6 +218,13 @@ symbol handleTable (string table, map event){
 		break;
   }
  }
+ if (size((list)UI::QueryWidget(`server, `Items))==0){
+  UI::ChangeWidget(`edit, `Enabled, false);
+  UI::ChangeWidget(`delete,  `Enabled, false);
+ } else {
+	  UI::ChangeWidget(`edit, `Enabled, true);
+	  UI::ChangeWidget(`delete,  `Enabled, true);
+	}
  return ret;
 }
 
@@ -436,6 +443,13 @@ symbol handleAuth(string key, map event){
 		break;
   }
  }
+ if (size((list)UI::QueryWidget(`incoming_table, `Items))==0){
+  UI::ChangeWidget(`edit, `Enabled, false);
+  UI::ChangeWidget(`delete,  `Enabled, false);
+ } else {
+	  UI::ChangeWidget(`edit, `Enabled, true);
+	  UI::ChangeWidget(`delete,  `Enabled, true);
+	}
 
  return nil;
 }
@@ -504,6 +518,13 @@ symbol handleModify(string key, map event){
 	break;
   }
  }
+ if (size((list)UI::QueryWidget(`lun_table, `Items))==0){
+  UI::ChangeWidget(`edit, `Enabled, false);
+  UI::ChangeWidget(`delete,  `Enabled, false);
+ } else {
+	  UI::ChangeWidget(`edit, `Enabled, true);
+	  UI::ChangeWidget(`delete,  `Enabled, true);
+	}
 }
 
 void storeModify(string option_id, map option_map){
