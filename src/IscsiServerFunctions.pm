@@ -132,7 +132,6 @@ sub setLUN {
   foreach my $row (@tmp_list){
    push(@list, $row) if ($row->{'KEY'} ne 'Lun');
   }
-print Dumper(@list);
   @tmp_list=@list;
   @new_target = @tmp_list;
   push(@new_target, @{$lun});
@@ -160,7 +159,6 @@ my @tmp_list = ( {'KEY'=>'Target', 'VALUE'=>$target} );
  push(@new_target, ( {'KEY'=>'Target', 'VALUE'=>$target} ));
  } else { @new_target = ( {'KEY'=>'Target', 'VALUE'=>$target} ); }
 push(@new_target, @{$lun});
-print Dumper(\@new_target);
 }
 
 

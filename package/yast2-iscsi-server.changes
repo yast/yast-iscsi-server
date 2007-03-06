@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar  6 12:51:03 CET 2007 - mzugec@suse.cz
+
+- iscsi-server writes to stdout (#250628) 
+
+-------------------------------------------------------------------
 Wed Feb  7 16:23:42 CET 2007 - mzugec@suse.de
 
 - disable edit and delete buttons in empty table (#241804)
