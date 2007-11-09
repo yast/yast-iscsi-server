@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Nov  9 10:29:58 CET 2007 - mzugec@suse.cz
+
+- fixed description in file dialogs 
+
+-------------------------------------------------------------------
 Tue Mar  6 12:51:49 CET 2007 - mzugec@suse.cz
 
 - iscsi-server writes to stdout (#250628) 

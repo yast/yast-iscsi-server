@@ -75,7 +75,7 @@ map <string, any> LUNDetailDialog(map<string, any> values_before){
 		  UI::ChangeWidget(`sectors, `Enabled, !enable);
 
 		 if (ret == `browse){
-		  string file = UI::AskForExistingFile("/", "", _(""));
+		  string file = UI::AskForExistingFile("/", "", _("Select file or device"));
 		  if (file!=nil) UI::ChangeWidget(`file_path, `Value, file);
 		 }
 	     ret = (symbol)UI::UserInput();
@@ -546,7 +546,7 @@ symbol handleLUN(string key, map event){
   UI::ChangeWidget(`sectors, `Enabled, !enable);
 
  if (event["EventReason"]:"" == "Activated" && event["WidgetID"]:nil == `browse){
-  string file = UI::AskForExistingFile("/", "", _(""));
+  string file = UI::AskForExistingFile("/", "", _("Select file or device"));
   if (file!=nil) UI::ChangeWidget(`file_path, `Value, file);
  }
 }
