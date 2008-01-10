@@ -3,6 +3,7 @@
 textdomain "iscsi-server";
 import "IscsiServerFunctions";
 import "Label";
+import "IP";
 //	**************** global funcions and variables *****
 string curr_target = "";
 string modify_record = "";
@@ -238,6 +239,34 @@ list <term> getAuthItems(){
  }
  return inc_items;
 }
+
+void initiSNS (string key) ``{
+boolean ac=false;
+string ip = "";
+foreach(map<string, any> row, IscsiServerFunctions::getConfig()["iSNS"]:[], {
+ if(row["KEY"]:""=="iSNSAccessControl") ac=(row["VALUE"]:"No"=="Yes") ? true : false;
+ if(row["KEY"]:""=="iSNSServer") ip=row["VALUE"]:"";
+});
+UI::ChangeWidget(`isns_ac, `Value, ac);
+UI::ChangeWidget(`isns_ip, `Value, ip);
+}
+
+boolean validateiSNS(string key, map event){
+ string ip = (string)UI::QueryWidget(`isns_ip, `Value);
+ boolean valid=true;
+ if (size(ip)>0) valid = IP::Check(ip);
+	else valid= true;
+ if (!valid)Popup::Error (_("Invalid IP address."));
+ return valid;
+}
+
+void storeiSNS(string option_id, map option_map){
+ string ip = (string)UI::QueryWidget(`isns_ip, `Value);
+ string ac=((boolean)UI::QueryWidget(`isns_ac, `Value))?"Yes":"No";
+ if (ip=="") ac="";
+ IscsiServerFunctions::setiSNS(ip, ac);
+}
+
 
 //	**************** Global Dialog	*********************
 void initGlobalValues(list<map<string, any> > values){
