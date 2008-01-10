@@ -30,16 +30,23 @@ sub parseConfig {
 
     my $scope="auth";
     foreach  my $row ( @$values ){
+
      if ($$row{'name'} eq 'Target'){
       $scope = $$row{'value'};
       $config{$scope} =  [ {'KEY' => 'Target', 'VALUE' => $scope } ];
-     } else {
+	} else {
+
+	if ( $$row{'name'}=~'iSNS' ) {$scope = 'iSNS';}
+	 else {
+		$scope='auth' if ($scope eq 'iSNS');	
+		}
+
 	    if (!ref($config{$scope})) {
 	     $config{$scope} = [ {'KEY' => $$row{'name'}, 'VALUE' => $$row{'value'} } ];
 	    } else {
-		    push(@{$config{$scope}}, ({'KEY'=>$$row{'name'}, 'VALUE'=>$$row{'value'}}));
-	 	   }
+	    push(@{$config{$scope}}, ({'KEY'=>$$row{'name'}, 'VALUE'=>$$row{'value'}}));
 	   }
+	}
     };
     return \%config;
 }
@@ -77,7 +84,7 @@ BEGIN { $TYPEINFO{getTargets} = ["function", ["map", "string", "any"] ] ; }
 sub getTargets {
  my $self = shift;
 
- return $self->removeKeyFromMap(\%config, 'auth');
+ return $self->removeKeyFromMap($self->removeKeyFromMap(\%config, 'auth'), 'iSNS');
 }
 
 # set discovery authentication
@@ -96,6 +103,19 @@ sub setAuth {
  $config{'auth'}=\@tmp_auth;
 }
 
+# set iSNS data
+BEGIN { $TYPEINFO{setiSNS} = ["function", "void", "string", "string" ]; }
+sub setiSNS {
+    my $self = shift;
+    my $ip = shift;
+    my $ac = shift;
+    my @isns = ();
+
+
+ push(@isns, {'KEY'=>'iSNSServer', 'VALUE'=>$ip}) if ($ip ne '');
+ push(@isns, {'KEY'=>'iSNSAccessControl', 'VALUE'=>$ac}) if ($ac ne '');
+ $config{'iSNS'}=\@isns;
+}
 # set authentication for given target
 BEGIN { $TYPEINFO{setTargetAuth} = ["function", "void", "string", ["list", "string"], "string" ]; }
 sub setTargetAuth {
@@ -203,22 +223,6 @@ sub ifExists {
  return $ret; 
 }
 
-# get highest lun +1
-#BEGIN { $TYPEINFO{getNextLun} = [ "function", "integer" ] ; }
-#sub getNextLun {
-# my $self = shift;
-# my $lun = -1;
-# foreach my $target (keys %{$self->removeKeyFromMap(\%config, 'auth')}){
-#  foreach my $tmp_hash (@{$config{$target}}){
-#   if ($$tmp_hash{'KEY'} eq 'Lun'){
-#    if ($$tmp_hash{'VALUE'}=~/([\d]+)[\s]*/) {
-#     $lun=$1 if ($1>$lun);
-#    }
-#   }
-#  }
-# } 
-# return $lun+1;
-#}
 
 # internal function
 # create map from given map in format needed by ini-agent
@@ -263,6 +267,7 @@ sub writeConfig {
       $scope = $$row{'value'};
       $new_config{$scope} =  [ $row ];
      } else {
+
 	    if (!ref($new_config{$scope})) {
 	     $new_config{$scope} = [ $row ];
 	    } else {
@@ -270,7 +275,6 @@ sub writeConfig {
 	 	   }
 	   }
     };
-
     # deleted items add to $changes{'del'}
     foreach my $key (keys %new_config){
      if (! defined $config{$key}){
@@ -302,8 +306,10 @@ sub writeConfig {
 	 $new_config{$key} = \@new;
 	}
     }
-    # write 'auth' into %new_config
-    $config_file{'value'} = $new_config{'auth'};
+    # write 'iSNS' and 'auth' into %new_config
+    $config_file{'value'} = $new_config{'iSNS'};
+      delete ($new_config{'iSNS'});
+      @{$config_file{'value'}} = (@{$config_file{'value'}}, @{$new_config{'auth'}}) ;
       delete ($new_config{'auth'});
     #write all targets into %new_config
     foreach my $key (reverse(keys %new_config )){

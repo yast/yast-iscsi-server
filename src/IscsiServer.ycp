@@ -132,7 +132,6 @@ boolean installed_packages(){
         {
         Popup::Error( Message::CannotContinueWithoutPackagesInstalled() );
     } else ret = true;
-
  return ret;
 }
 

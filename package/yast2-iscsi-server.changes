@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jan 10 19:19:10 CET 2008 - mzugec@suse.cz
+
+- added iSNS support (FaTE #302083)
+- 2.14.4 
+
+-------------------------------------------------------------------
 Fri Nov  9 10:29:58 CET 2007 - mzugec@suse.cz
 
 - fixed description in file dialogs 
