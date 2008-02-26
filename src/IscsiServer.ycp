@@ -26,6 +26,7 @@ import "SuSEFirewall";
 import "Confirm";
 import "IscsiServerFunctions";
 import "Mode";
+import "NetworkService";
 
 boolean serviceStatus = false;
 boolean statusOnStart = false;
@@ -279,6 +280,7 @@ global boolean Read() {
 
     // check if user is root
     if(!Confirm::MustBeRoot()) return false;
+    if(!NetworkService::RunningNetworkPopup()) return false;
     Progress::NextStage();
     // check if required packages ("iscsitarget") are installed
     if(!installed_packages()) return false;
