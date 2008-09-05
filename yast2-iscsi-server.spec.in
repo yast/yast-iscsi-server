@@ -7,7 +7,7 @@ Requires:	yast2
 
 BuildArchitectures:	noarch
 
-Summary:	Configuration of iscsi-server
+Summary:	Configuration of iSCSI target
 
 %description
 -
