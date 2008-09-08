@@ -95,8 +95,8 @@ It is not possible. You must code it first. :-)
 
 	// discovery authentication
 	"global_config"	: _(
-"Select the type of authentication. Use <b>No Authentication</b> or one of <b>Incoming</b> and <b>Outgoing</b> (can be both together). Then insert <b>User</b> and <b>Password</b>. \n"
-"For incoming authentication, it is possible to <b>Add</b> more  pairs and <b>Edit</b> and <b>Delete</b> them."),
+"Select the type of authentication. Use <b>No Authentication</b> or one of <b>Incoming</b> and <b>Outgoing</b> (can be both together). Then insert <b>User</b> and <b>Password</b>.\n"
+"For incoming authentication, it is possible to <b>Add</b> more  pairs or <b>Edit</b> or <b>Delete</b> them."),
 
 	// target dialog
 	"server_table" :_(
