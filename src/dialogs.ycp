@@ -178,8 +178,10 @@ map<string, map <string, any> > widgets = $[
 	"widget" : `custom,
 	"custom_widget" :
 	`HBox(
-		`CheckBox(`id(`isns_ac), _("iSNS Access Control")),
-		`TextEntry(`id(`isns_ip), _("iSNS Server"))
+		`CheckBoxFrame(`id(`isns_ac), _("iSNS Access Control"), true,
+		 `VBox(
+			`TextEntry(`id(`isns_ip), _("iSNS Server"))
+		))
 	),
 	"init" : initiSNS,
         "validate_type" : `function,

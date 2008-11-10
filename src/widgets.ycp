@@ -261,10 +261,14 @@ boolean validateiSNS(string key, map event){
 }
 
 void storeiSNS(string option_id, map option_map){
- string ip = (string)UI::QueryWidget(`isns_ip, `Value);
- string ac=((boolean)UI::QueryWidget(`isns_ac, `Value))?"Yes":"No";
- if (ip=="") ac="";
- IscsiServerFunctions::setiSNS(ip, ac);
+ string ip="";
+ if ((boolean)UI::QueryWidget(`isns_ac, `Value))
+  {
+   ip = (string)UI::QueryWidget(`isns_ip, `Value);
+  }
+   string ac=((boolean)UI::QueryWidget(`isns_ac, `Value))?"Yes":"No";
+   if (ip=="") ac="";
+   IscsiServerFunctions::setiSNS(ip, ac);
 }
 
 

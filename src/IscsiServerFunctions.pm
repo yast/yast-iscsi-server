@@ -309,7 +309,7 @@ sub writeConfig {
     # write 'iSNS' and 'auth' into %new_config
     $config_file{'value'} = $new_config{'iSNS'};
       delete ($new_config{'iSNS'});
-      @{$config_file{'value'}} = (@{$config_file{'value'}}, @{$new_config{'auth'}}) ;
+    if (exists $new_config{'auth'})  { @{$config_file{'value'}} = (@{$config_file{'value'}}, @{$new_config{'auth'}}) }
       delete ($new_config{'auth'});
     #write all targets into %new_config
     foreach my $key (reverse(keys %new_config )){
