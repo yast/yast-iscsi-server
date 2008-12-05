@@ -53,7 +53,10 @@ map <string, any> LUNDetailDialog(map<string, any> values_before){
 			   `Left( `RadioButton(`id(`fileio), `opt(`notify), "Type=fileio", previous["fileio"]:true) ),
 			   `HBox(
 				`TextEntry( `id( `file_path ), _("Path:"), previous["path"]:""),
-				`PushButton(`id(`browse), _("Browse"))
+				 `VBox(
+				  `Label(""),
+				  `PushButton(`id(`browse), _("Browse"))
+				 )
 				),
 			   `TextEntry( `id( `scsi_id ), "ScsiId:", previous["scsi_id"]:"" ),
 			`VSpacing(2),
