@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Dec 16 13:46:27 CET 2008 - mzugec@suse.de
+
+- fixed IscsiServerFunctions::writeConfig (bnc#459006)
+- 2.13.27 
+
+-------------------------------------------------------------------
 Thu Jan 10 20:32:53 CET 2008 - mzugec@suse.de
 
 - added support for iSNS (FaTE #302083)
