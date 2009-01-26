@@ -98,7 +98,7 @@ any IscsiServerSequence() {
 	]
     ];
 
-    Wizard::CreateDialog();
+    Wizard::OpenCancelOKDialog();
 
     any ret = Sequencer::Run(aliases, sequence);
 
