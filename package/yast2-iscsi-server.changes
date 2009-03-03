@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar  3 13:18:40 CET 2009 - mzugec@suse.cz
+
+- handle exceptions - thanks to ajohansson@novell.com (bnc#481379)
+- 2.18.1 
+
+-------------------------------------------------------------------
 Mon Jan 26 14:52:22 CET 2009 - mzugec@suse.cz
 
 - button labeling (bnc#440542)
