@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu May 21 09:19:51 CEST 2009 - mzugec@suse.cz
+
+- handle correctly when tgt is already installed (bnc#501375)
+- 2.18.3 
+
+-------------------------------------------------------------------
 Mon Mar  9 15:42:14 CET 2009 - mzugec@suse.cz
 
 - correctly work with firewall (bnc#462006)
