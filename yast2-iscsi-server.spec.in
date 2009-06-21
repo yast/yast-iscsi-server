@@ -10,7 +10,7 @@ Requires:       yast2 >= 2.18.2
 
 BuildArchitectures:	noarch
 
-Summary:	Configuration of iSCSI target
+Summary:	YaST2 - Configuration of iSCSI target
 
 %description
 -
