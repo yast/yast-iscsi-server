@@ -13,7 +13,7 @@ BuildArchitectures:	noarch
 Summary:	YaST2 - Configuration of iSCSI target
 
 %description
--
+Configuration of iSCSI target
 
 @PREP@
 
