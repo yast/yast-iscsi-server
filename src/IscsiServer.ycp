@@ -27,6 +27,8 @@ import "Confirm";
 import "IscsiServerFunctions";
 import "Mode";
 import "NetworkService";
+import "PackageSystem";
+import "Label";
 
 boolean serviceStatus = false;
 boolean statusOnStart = false;
@@ -125,15 +127,21 @@ boolean writeConfig(){
 
 // test if required package ("iscsitarget") is installed
 boolean installed_packages(){
- boolean ret = false;
- y2milestone("Check if iscsitarget is installed");
-  if( !Package::InstallMsg( "iscsitarget",
-            _("<p>To configure the iSCSI target, the <b>%1</b> package must be installed.</p>") +
-            _("<p>Install it now?</p>")) )
-        {
-        Popup::Error( Message::CannotContinueWithoutPackagesInstalled() );
-    } else ret = true;
- return ret;
+ if (!PackageSystem::PackageInstalled("iscsitarget")){
+  y2milestone("Not installed, will install");
+  boolean confirm = Popup::AnyQuestionRichText(
+        "", _("Can't continue without installing iscsitarget package"), 40, 10,
+        Label::InstallButton(), Label::CancelButton (), `focus_yes
+    );
+
+  if (confirm){
+   if (PackageSystem::PackageInstalled("tgt")) PackageSystem::DoRemove(["tgt"]);
+   PackageSystem::DoInstall(["iscsitarget"]);
+    if (PackageSystem::PackageInstalled("iscsitarget")) return true;
+	else return false;
+  }
+  return false;
+ } else return true;
 }
 
 // check status of iscsitarget service

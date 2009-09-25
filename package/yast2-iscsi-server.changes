@@ -1,4 +1,22 @@
 -------------------------------------------------------------------
+Thu May 21 09:19:02 CEST 2009 - mzugec@suse.cz
+
+- handle correctly when tgt is already installed (bnc#501375)
+- 2.17.7 
+
+-------------------------------------------------------------------
+Mon Mar 23 17:51:33 CET 2009 - mzugec@suse.de
+
+- correctly work with firewall (bnc#462006)
+- 2.17.6 
+
+-------------------------------------------------------------------
+Mon Mar 23 17:49:21 CET 2009 - mzugec@suse.de
+
+- handle exceptions - thanks to ajohansson@novell.com (bnc#481379)
+- 2.17.5 
+
+-------------------------------------------------------------------
 Fri Dec  5 10:51:24 CET 2008 - mzugec@suse.cz
 
 - align button (bnc#447558)
