@@ -49,6 +49,8 @@ map tabs_descr = $[
                                 "isns",
                                 `VSpacing (2),
                                 "firewall",
+                                `VSpacing (2),
+				"save",
                                 `VSpacing (2)
                                 ),
                            `HSpacing (1),
@@ -56,7 +58,7 @@ map tabs_descr = $[
                               ),
                           `VStretch()
                         ),
-         "widget_names" : [ "auto_start_up", "isns", "firewall" ]
+         "widget_names" : [ "auto_start_up", "isns", "firewall", "save" ]
          ],
 // second tab - global authentication
         "global":$[
@@ -102,8 +104,8 @@ map tabs_descr = $[
 	  "contents" :
                  `VBox(
 		  `HBox(
-			  `TextEntry(`id(`target), _("Target"), "iqn.2001-04.com.example"),
-			  `TextEntry(`id(`identifier), _("Identifier"), "test")
+			  `InputField(`id(`target), `opt(`hstretch), _("Target"), "iqn.2001-04.com.example"),
+			  `InputField(`id(`identifier), `opt(`hstretch), _("Identifier"), "test")
 			),
                         `VBox(
 				`Table(`id(`lun_table),
@@ -144,7 +146,7 @@ map tabs_descr = $[
                         `VSpacing(2),
                         `Left( `CheckBox(`id(`auth_out),`opt(`notify), _("Outgoing Authentication"), false) ),
                         `HBox(
-                                `TextEntry(`id(`user_out), _("Username")), `Password(`id(`pass_out), _("Password"))
+                                `InputField(`id(`user_out), `opt(`hstretch), _("Username")), `Password(`id(`pass_out), _("Password"))
                           )
                   )
 	]
@@ -174,13 +176,20 @@ map<string, map <string, any> > widgets = $[
 	        "services" : [ "service:iscsitarget" ],
 	        "display_details" : true,
 	      ]),
+      "save" : $[
+	"widget" : `push_button,
+	"label" : Label::SaveButton(),
+	"handle" : saveConfiguration,
+	"opt": [],
+	"help": HELPS["save_configuration"]:""
+      ],
       "isns" : $[
 	"widget" : `custom,
 	"custom_widget" :
 	`HBox(
 		`CheckBoxFrame(`id(`isns_ac), _("iSNS Access Control"), true,
 		 `VBox(
-			`TextEntry(`id(`isns_ip), _("iSNS Server"))
+			`InputField(`id(`isns_ip), `opt(`hstretch), _("iSNS Server"))
 		))
 	),
 	"init" : initiSNS,

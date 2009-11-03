@@ -5,8 +5,13 @@
 
 package IscsiServerFunctions;
 use strict;
+use YaST::YCP qw(:LOGGING);
 use Data::Dumper;
 use YaPI;
+use Switch;
+
+YaST::YCP::Import ("SCR");
+
 
 our %TYPEINFO;
 
@@ -391,6 +396,64 @@ sub setDelChanges {
 
  return \$ret;
 }
+
+BEGIN { $TYPEINFO{SaveIntoFile} = ["function", "boolean", "string" ]; }
+sub SaveIntoFile {
+ my $self = shift;
+ my $filename = shift;
+ my $file="";
+ my $delimiter = "---------------------\n";
+
+ my $auth = $self->getConfig()->{"auth"};
+ if (defined $auth && scalar(@{$auth})>0){
+  $file = "Discovery authentication:\n" . $delimiter;
+  foreach my $row (@{$auth}){
+    $file = $file . $row->{'KEY'} . ": " . $row->{'VALUE'} . "\n";
+  }
+  $file = $file . "\n";
+ }
+
+# my $isns = $self->getConfig()->{"iSNS"};
+# if (defined $isns && $isns>0){
+#  foreach my $row (@{$isns}){
+#    y2internal("isns ", Dumper($row));
+#  }
+# }
+
+ my %targets = %{$self->getTargets()};
+ if (scalar(keys %targets)>0){
+  $file = $file . "Targets\n" . $delimiter . "\n";
+ }
+ foreach my $target (keys %targets){
+  my $target_name = "";
+  my @auths	  = ();
+  my @luns 	  = ();
+   foreach my $row (@{$targets{$target}}){
+    switch ($row->{'KEY'}) {
+      case ('Target') {
+	$target_name = $row->{'VALUE'};
+      }
+      case ('Lun') {
+	push(@luns, $row->{'VALUE'});
+      }
+      case ('IncomingUser' || 'OutgoingUser') {
+	push(@auths, $row->{'KEY'} . ": " . $row->{'VALUE'})
+      }
+    }
+  }
+  $file = $file . $target_name . "\n";
+  $file = $file . "Luns: " . join(', ', @luns) . "\n" if (scalar(@luns) > 0);
+  $file = $file . join("\n", @auths) if (scalar(@auths) > 0);
+  $file = $file . "\n";
+ }
+
+ y2milestone("Save report : \n", $file);
+
+  my $result = SCR -> Write (".target.string", $filename, $file);
+ y2milestone("Save result: ", $result);
+ return $result;
+}
+
 
 1;
 # EOF
