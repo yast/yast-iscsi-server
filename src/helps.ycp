@@ -38,6 +38,10 @@ An additional dialog informs whether it is safe to do so.
 </p>
 "),
 
+    "save_configuration" : _("<p><b>Save</b> button will export some informations about
+targets into selected file.</p>"),
+
+
     /* Summary dialog help 1/3 */
     "summary" : _("<p><b><big>iSCSI Target Configuration</big></b><br>
 Configure an iSCSI target here.<br></p>

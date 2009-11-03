@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov  3 12:48:42 CET 2009 - mzugec@suse.cz
+
+- export credentials for target (fate#301932)
+- 2.18.4 
+
+-------------------------------------------------------------------
 Thu May 21 09:19:51 CEST 2009 - mzugec@suse.cz
 
 - handle correctly when tgt is already installed (bnc#501375)

@@ -47,22 +47,22 @@ map <string, any> LUNDetailDialog(map<string, any> values_before){
 	map <string, any> ret_map = $[];
 	term lun_dialog =
                  `VBox(
-			`Left( `HWeight(3,  `TextEntry( `id( `lun ), "LUN", previous["lun"]:"0" )) ),
+			`Left( `HWeight(3,  `InputField( `id( `lun ), `opt(`hstretch), "LUN", previous["lun"]:"0" )) ),
 			`VSpacing(2),
 			`RadioButtonGroup(`id(`rb),                           `VBox(
 			   `Left( `RadioButton(`id(`fileio), `opt(`notify), "Type=fileio", previous["fileio"]:true) ),
 			   `HBox(
-				`TextEntry( `id( `file_path ), _("Path:"), previous["path"]:""),
+				`InputField( `id( `file_path ), `opt(`hstretch), _("Path:"), previous["path"]:""),
 				 `VBox(
 				  `Label(""),
 				  `PushButton(`id(`browse), _("Browse"))
 				 )
 				),
-			   `TextEntry( `id( `scsi_id ), "ScsiId:", previous["scsi_id"]:"" ),
+			   `InputField( `id( `scsi_id ), `opt(`hstretch), "ScsiId:", previous["scsi_id"]:"" ),
 			`VSpacing(2),
 
 			   `Left( `RadioButton(`id(`nullio), `opt(`notify), "Type=nullio", previous["nullio"]:false) ),
-			   `TextEntry( `id( `sectors ), _("Sectors:"), previous["sectors"]:"" )
+			   `InputField( `id( `sectors ), `opt(`hstretch), _("Sectors:"), previous["sectors"]:"" )
 			  )
 			 ),
 			`Left( `HBox( `PushButton(`id(`ok), Label::OKButton() ), `PushButton(`id(`cancel), Label::CancelButton() )))
@@ -149,7 +149,7 @@ string getOutgoingValues(){
 // dialog to add/modify user and password
 list <string> getDialogValues(string user, string pass){
  UI::OpenDialog( `VBox(
-		   `TextEntry(`id(`p_user),_("Username"), user),
+		   `InputField(`id(`p_user), `opt(`hstretch), _("Username"), user),
 		   `Password(`id(`p_pass), _("Password"), pass),
 		   `HBox(
 			`PushButton(`id(`ok), _("OK")),
@@ -174,6 +174,31 @@ list <string> getDialogValues(string user, string pass){
  if (size(user)>0 && size(pass)>0) return [user, pass];
 	else return [];
 }
+
+
+symbol saveConfiguration(string key, map event){
+  if (is(event["ID"]:nil, string) && event["ID"]:"" == "save"){
+        any filename = UI::AskForSaveFileName("/",  "*", _("Save as..."));
+        if ( filename != nil && (string)filename!="")
+        {
+            if ( IscsiServerFunctions::SaveIntoFile( (string)filename ))
+            {
+                Popup::Message(sformat(_("File %1 was saved successfully."), filename));
+                list pathComponents = splitstring(  (string)filename, "/");
+                integer s = size(pathComponents) - 1;
+                string base = pathComponents[s]:"default";
+            }
+            else
+            {
+                Popup::Warning(_("An error occured while saving the file."));
+            }
+        }
+  }
+ return nil;
+}
+
+
+
 
 //	**************** Server Dialog	*********************
 // dialog with targets
