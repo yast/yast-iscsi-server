@@ -17,9 +17,8 @@ X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=iscsi-server
 
 Icon=yast-iscsi-server
-Exec=/sbin/yast2 iscsi-server 
+Exec=xdg-su -c "/sbin/yast2 iscsi-server"
 
 Name=iSCSI Target
 GenericName=Configure an iSCSI target
-X-KDE-SubstituteUID=true
 StartupNotify=true
