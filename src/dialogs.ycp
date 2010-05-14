@@ -45,13 +45,13 @@ map tabs_descr = $[
                            `HSpacing (1),
                             `VBox(
                                 "auto_start_up",
-                                `VSpacing (2),
+                                `VSpacing (1),
                                 "isns",
-                                `VSpacing (2),
+                                `VSpacing (1),
                                 "firewall",
-                                `VSpacing (2),
+                                `VSpacing (1),
 				"save",
-                                `VSpacing (2)
+                                `VSpacing (1)
                                 ),
                            `HSpacing (1),
                            `HStretch()

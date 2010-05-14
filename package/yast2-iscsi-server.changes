@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri May 14 12:52:49 CEST 2010 - mzugec@suse.cz
+
+- improved UI for small screens (bnc#582306)
+- 2.19.0 
+
+-------------------------------------------------------------------
 Tue Nov  3 12:48:42 CET 2009 - mzugec@suse.cz
 
 - export credentials for target (fate#301932)
