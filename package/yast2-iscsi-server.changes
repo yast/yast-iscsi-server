@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr 22 14:03:44 CEST 2011 - mvidner@suse.cz
+
+- Replaced Perl 'switch' with 'if' to silence a warning (bnc#676679).
+
+-------------------------------------------------------------------
 Fri May 14 12:52:49 CEST 2010 - mzugec@suse.cz
 
 - improved UI for small screens (bnc#582306)

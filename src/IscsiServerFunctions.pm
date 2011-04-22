@@ -8,7 +8,6 @@ use strict;
 use YaST::YCP qw(:LOGGING);
 use Data::Dumper;
 use YaPI;
-use Switch;
 
 YaST::YCP::Import ("SCR");
 
@@ -428,18 +427,18 @@ sub SaveIntoFile {
   my $target_name = "";
   my @auths	  = ();
   my @luns 	  = ();
-   foreach my $row (@{$targets{$target}}){
-    switch ($row->{'KEY'}) {
-      case ('Target') {
+  foreach my $row (@{$targets{$target}}){
+      my $key = $row->{'KEY'};
+
+      if ($key eq 'Target') {
 	$target_name = $row->{'VALUE'};
       }
-      case ('Lun') {
+      elsif ($key eq 'Lun') {
 	push(@luns, $row->{'VALUE'});
       }
-      case ('IncomingUser' || 'OutgoingUser') {
-	push(@auths, $row->{'KEY'} . ": " . $row->{'VALUE'})
+      elsif ($key eq 'IncomingUser' || $key eq 'OutgoingUser') {
+	push(@auths, $key . ": " . $row->{'VALUE'})
       }
-    }
   }
   $file = $file . $target_name . "\n";
   $file = $file . "Luns: " . join(', ', @luns) . "\n" if (scalar(@luns) > 0);
