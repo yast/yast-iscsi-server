@@ -68,6 +68,7 @@ map <string, any> LUNDetailDialog(map<string, any> values_before){
 			`Left( `HBox( `PushButton(`id(`ok), Label::OKButton() ), `PushButton(`id(`cancel), Label::CancelButton() )))
 		  );
 	    UI::OpenDialog(lun_dialog);
+    UI::ChangeWidget(`id(`lun), `ValidChars, "0123456789" );
 	    symbol ret = `nil;
 	    while(ret != `ok && ret !=`cancel){
 		 boolean enable=false;
