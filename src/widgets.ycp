@@ -65,7 +65,7 @@ map <string, any> LUNDetailDialog(map<string, any> values_before){
 			   `InputField( `id( `sectors ), `opt(`hstretch), _("Sectors:"), previous["sectors"]:"" )
 			  )
 			 ),
-			`Left( `HBox( `PushButton(`id(`ok), Label::OKButton() ), `PushButton(`id(`cancel), Label::CancelButton() )))
+			`Left( `ButtonBox( `PushButton(`id(`ok), Label::OKButton() ), `PushButton(`id(`cancel), Label::CancelButton() )))
 		  );
 	    UI::OpenDialog(lun_dialog);
     UI::ChangeWidget(`id(`lun), `ValidChars, "0123456789" );
@@ -152,9 +152,9 @@ list <string> getDialogValues(string user, string pass){
  UI::OpenDialog( `VBox(
 		   `InputField(`id(`p_user), `opt(`hstretch), _("Username"), user),
 		   `Password(`id(`p_pass), _("Password"), pass),
-		   `HBox(
-			`PushButton(`id(`ok), _("OK")),
-			`PushButton(`id(`cancel),_("Cancel")))
+		   `ButtonBox(
+			`PushButton(`id(`ok), Label::OKButton()),
+			`PushButton(`id(`cancel), Label::CancelButton()))
 			)
                 );
 	boolean cycle = true;

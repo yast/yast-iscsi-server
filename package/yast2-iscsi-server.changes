@@ -2,6 +2,7 @@
 Thu Jun 30 13:37:59 CEST 2011 - fehr@suse.de
 
 - fix typos in stranlatable texts (bnc#703125)
+- use ButtonBox widget where appropriate (bnc#701259)
 - 2.21.2
 
 -------------------------------------------------------------------
