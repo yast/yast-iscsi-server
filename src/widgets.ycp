@@ -191,7 +191,7 @@ symbol saveConfiguration(string key, map event){
             }
             else
             {
-                Popup::Warning(_("An error occured while saving the file."));
+                Popup::Warning(_("An error occurred while saving the file."));
             }
         }
   }

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jun 30 13:37:59 CEST 2011 - fehr@suse.de
+
+- fix typos in stranlatable texts (bnc#703125)
+- 2.21.2
+
+-------------------------------------------------------------------
 Mon May 16 11:29:53 CEST 2011 - fehr@suse.de
 
 - allow only integer values in lun input field (bnc#693683)
