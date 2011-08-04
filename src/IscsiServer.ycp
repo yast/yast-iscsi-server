@@ -135,7 +135,9 @@ boolean installed_packages(){
     );
 
   if (confirm){
-   if (PackageSystem::PackageInstalled("tgt")) PackageSystem::DoRemove(["tgt"]);
+   string service = "tgtd";
+   if (Service::Status(service)==0) Service::Stop(service);
+   Service::Disable(service);
    PackageSystem::DoInstall(["iscsitarget"]);
     if (PackageSystem::PackageInstalled("iscsitarget")) return true;
 	else return false;

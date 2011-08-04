@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Aug  4 14:11:23 CEST 2011 - fehr@suse.de
+
+- do not remove tgt package, just stop and disable tgtd service, 
+  this way possible tgt config files do not get lost (bnc#706580)
+
+-------------------------------------------------------------------
 Thu Jun 30 13:37:59 CEST 2011 - fehr@suse.de
 
 - fix typos in translatable texts (bnc#703125)
