@@ -1,22 +1,4 @@
 -------------------------------------------------------------------
-Thu Aug  4 14:02:26 CEST 2011 - fehr@suse.de
-
-- do not remove tgt package, just stop and disable tgtd service, 
-  this way possible tgt config files do not get lost (bnc#706580)
-- 2.17.10
-
--------------------------------------------------------------------
-Thu Jun 30 16:16:50 CEST 2011 - fehr@suse.de
-
-- fix typos in translatable texts (bnc#703125)
-
--------------------------------------------------------------------
-Mon May 16 11:29:53 CEST 2011 - fehr@suse.de
-
-- allow only integer values in lun input field (bnc#693683)
-- 2.17.9
-
--------------------------------------------------------------------
 Tue Nov  3 12:52:14 CET 2009 - mzugec@suse.cz
 
 - export credentials for target (fate#301932)

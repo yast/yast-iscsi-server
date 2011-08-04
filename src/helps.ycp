@@ -38,7 +38,7 @@ An additional dialog informs whether it is safe to do so.
 </p>
 "),
 
-    "save_configuration" : _("<p><b>Save</b> button will export some information about
+    "save_configuration" : _("<p><b>Save</b> button will export some informations about
 targets into selected file.</p>"),
 
 
