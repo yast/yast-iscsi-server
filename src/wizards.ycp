@@ -99,6 +99,7 @@ any IscsiServerSequence() {
     ];
 
     Wizard::OpenCancelOKDialog();
+    Wizard::SetDesktopTitleAndIcon("iscsi-server");
 
     any ret = Sequencer::Run(aliases, sequence);
 
