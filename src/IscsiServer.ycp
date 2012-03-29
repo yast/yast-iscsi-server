@@ -130,7 +130,7 @@ boolean installed_packages(){
  if (!PackageSystem::PackageInstalled("iscsitarget")){
   y2milestone("Not installed, will install");
   boolean confirm = Popup::AnyQuestionRichText(
-        "", _("Can't continue without installing iscsitarget package"), 40, 10,
+        "", _("Cannot continue without installing iscsitarget package."), 40, 10,
         Label::InstallButton(), Label::CancelButton (), `focus_yes
     );
 
@@ -179,8 +179,8 @@ boolean setServiceStatus(){
 boolean reloadServer(){
 // ask user whether reload or restart server
 // #180205 - gettext problem - string wasn't marked to translate
-if (Popup::YesNo(_( "If changes have been made, the iSCSI target is not able
-to reload current configuration. It can only restart.
+if (Popup::YesNo(_("If changes have been made, the iSCSI target is not able
+to reload the current configuration. It can only restart.
 When restarting, all sessions are aborted.
 Restart the iscsitarget service?
 "))) Service::Restart("iscsitarget");

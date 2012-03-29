@@ -98,26 +98,24 @@ It is not possible. You must code it first. :-)
 </p>"),
 
 	// discovery authentication
-	"global_config"	: _(
-"Select the type of authentication. Use <b>No Authentication</b> or one of <b>Incoming</b> and <b>Outgoing</b> (can be both together). Then insert <b>User</b> and <b>Password</b>.\n"
+	"global_config"	: _("Select the type of authentication. Use <b>No Authentication</b> or one of <b>Incoming</b> and <b>Outgoing</b> (can be both together). Then insert <b>User</b> and <b>Password</b>.\n"
 "For incoming authentication, it is possible to <b>Add</b> more  pairs or <b>Edit</b> or <b>Delete</b> them."),
 
 	// target dialog
-	"server_table" :_(
-"List of offered targets. Create a new target by clicking <b>Add</b>. \n"
-"To delete or modify an item, select it and press <b>Modify</b> or <b>Delete</b>."
-),
+	"server_table" :_("List of offered targets. Create a new target by clicking <b>Add</b>. \n"
+"To delete or modify an item, select it and press <b>Modify</b> or <b>Delete</b>."),
 
 	// edit target
 	"target-modify":	_("<h1>iSCSI Target</h1>") + _("It is possible to change the <b>Path</b> to block devices, regular files, LVM, or RAID.
 "),
 
 	// add target
-	"target-add":	_("<h1>iSCSI Target</h1>") + _(
-"Create a new target. Replace template values with the correct values.\n"
+	"target-add":	_("<h1>iSCSI Target</h1>") + _("Create a new target. Replace template values with the correct values.\n"
 "For <b>Target</b>, use the format iqn.yyyy-mm.<reversed domain name>.\n"
 "For <b>Path</b>, use block devices, regular files, LVM, or RAID.\n")
-+_("<b>Add</b> one or more LUNs.\nIf you need any extra options, push <b>Expert Settings</b>."),
++_("<b>Add</b> one or more LUNs.
+If you need additional options, click <b>Expert Settings</b>.
+"),
 
 
 	// expert dialog
