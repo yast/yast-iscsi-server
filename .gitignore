@@ -25,3 +25,5 @@ testsuite/tmp*
 testsuite/site.exp
 testsuite/config
 testsuite/run
+package/*.bz2
+package/*.spec
