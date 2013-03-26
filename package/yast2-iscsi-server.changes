@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar 26 13:07:57 CET 2013 - fehr@suse.de
+
+- Use /etc/iet/ietd.conf instead of /etc/ietd.conf (bnc#800956)
+
+-------------------------------------------------------------------
 Tue Apr 10 17:26:44 CEST 2012 - fehr@suse.de
 
 - Changed license to GPL 2.0
