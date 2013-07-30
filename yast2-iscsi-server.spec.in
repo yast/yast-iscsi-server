@@ -13,6 +13,8 @@ Requires:       yast2 >= 2.21.22
 
 BuildArchitectures:	noarch
 
+Requires:       yast2-ruby-bindings >= 1.0.0
+
 Summary:	YaST2 - Configuration of iSCSI target
 
 %description
@@ -30,8 +32,8 @@ Configuration of iSCSI target
 %defattr(-,root,root)
 %dir @yncludedir@/iscsi-server
 @yncludedir@/iscsi-server/*
-@clientdir@/iscsi-server.ycp
-@clientdir@/iscsi-server_*.ycp
+@clientdir@/iscsi-server.rb
+@clientdir@/iscsi-server_*.rb
 @moduledir@/IscsiServer*
 @desktopdir@/iscsi-server.desktop
 @scrconfdir@/ietd.scr
