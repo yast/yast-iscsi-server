@@ -1,26 +1,28 @@
-# Makefile.am for iscsi-server/src
+# Sources for iscsi-server
+
+module_DATA = \
+  modules/IscsiServer.rb \
+  modules/IscsiServerFunctions.pm
+
+client_DATA = \
+  clients/iscsi-server.rb \
+  clients/iscsi-server_auto.rb \
+  clients/iscsi-server_proposal.rb
 
 yncludedir = @yncludedir@/iscsi-server
+ynclude_DATA = \
+  include/iscsi-server/widgets.rb \
+  include/iscsi-server/wizards.rb \
+  include/iscsi-server/dialogs.rb \
+  include/iscsi-server/complex.rb \
+  include/iscsi-server/helps.rb
 
-client_DATA =			\
-	iscsi-server.ycp		\
-	iscsi-server_auto.ycp	\
-	iscsi-server_proposal.ycp
+scrconf_DATA = \
+  scrconf/ietd.scr
 
-ynclude_DATA =			\
-	helps.ycp		\
-	wizards.ycp		\
-	dialogs.ycp		\
-	complex.ycp		\
-	widgets.ycp
+desktop_DATA = \
+  desktop/iscsi-server.desktop
 
-desktop_DATA =			\
-	iscsi-server.desktop
-
-module_DATA =			\
-	IscsiServer.ycp		\
-	IscsiServerFunctions.pm
-
-EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(desktop_DATA)
+EXTRA_DIST = $(module_DATA) $(client_DATA) $(ynclude_DATA) $(scrconf_DATA) $(desktop_DATA)
 
 include $(top_srcdir)/Makefile.am.common
