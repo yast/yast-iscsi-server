@@ -26,7 +26,7 @@ Source0:        %{name}-%{version}.tar.bz2
 Group:	        System/YaST
 License:        GPL-2.0
 BuildRequires:  docbook-xsl-stylesheets doxygen libxslt perl-XML-Writer popt-devel sgml-skel update-desktop-files yast2 yast2-packagemanager-devel yast2-perl-bindings yast2-testsuite
-BuildRequires:  yast2-devtools >= 3.0.6
+BuildRequires:  yast2-devtools >= 3.1.10
 
 # network needs Wizard::OpenCancelOKDialog()
 #  function from yast2-2.18.2
