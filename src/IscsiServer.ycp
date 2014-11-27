@@ -118,7 +118,18 @@ boolean writeConfig(){
  });
 
  config_file["value"] = value;
- y2milestone("config_file to write %1", config_file);
+ 
+ map <string, any> log_config = config_file;
+ list<map<string, any> > log_value = [];
+ foreach(map<string, any> row, config_file["value"]:[], {
+  if ( (row["name"]:""=="IncomingUser") || (row["name"]:""=="OutgoingUser") )
+      row["value"] = "*** ***";         // don't log user/password
+  log_value = add(log_value, row);
+ });
+  
+ log_config["value"] = log_value;
+ y2milestone("config_file to write %1", log_config);
+
  // write it
  SCR::Write(.etc.ietd.all, config_file);
  SCR::Write(.etc.ietd, nil);
